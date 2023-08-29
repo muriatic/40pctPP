@@ -88,12 +88,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// no clue if this works but at this point we know that there is an IDENT token and
 		// the way that IDENTs are created require them to be created with a value
 		// gets the value at this pointer
-		std::cout << "before empty optional" << std::endl;
-		std::string varName = *Peek().value().value;
-		std::cout << "after empty optional" << std::endl;
+		std::string varName = *stmt_INT_def.IDENT.value;
 
-		//std::string varName = Peek().value().value_or("sth");
-		Consume();
 
 		// check if token DNE or isn't an =
 		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
