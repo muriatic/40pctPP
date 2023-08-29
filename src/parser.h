@@ -28,13 +28,13 @@ struct NodeStmtReturn {
 	NodeExpr expr;
 };
 
-struct NodeStmtLet {
+struct NodeStmtIntDef {
 	Tokens IDENT;
 	NodeExpr expr;
 };
 
 struct NodeStmt {
-	std::variant<NodeStmtReturn/*, NodeStmtExit*/, NodeStmtLet> var;
+	std::variant<NodeStmtReturn/*, NodeStmtExit*/, NodeStmtIntDef> var;
 };
 
 struct NodeProg {

@@ -48,9 +48,9 @@ public:
 				// access GenExpr from parent class
 				gen->GenExpr(stmt_return.expr);
 			}
-			void operator()(const NodeStmtLet& stmt_let) const
+			void operator()(const NodeStmtIntDef& stmt_INT_def) const
 			{
-				gen->GenExpr(stmt_let.expr);
+				gen->GenExpr(stmt_INT_def.expr);
 			}
 		};
 

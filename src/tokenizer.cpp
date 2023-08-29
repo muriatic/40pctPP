@@ -34,6 +34,12 @@ std::vector <Tokens> Tokenizer::Tokenize()
 				continue;
 			}
 
+			if (buffer == "INT")
+			{
+				tokens.push_back({ .type = TokenType::INTEGER_DEF });
+				buffer.clear();
+				continue;
+			}
 			tokens.push_back({ .type = TokenType::IDENT, .value = buffer });
 			buffer.clear();
 			continue;

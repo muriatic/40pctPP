@@ -71,6 +71,59 @@ std::optional<NodeStmt> Parser::ParseStmt()
 
 		return NodeStmt{ .var = stmt_return };
 	}
+	else if (Peek().value().type == TokenType::INTEGER_DEF)
+	{
+		// consume integer definition 
+		Consume();
+
+		// check if either the enxt token DNE or isn't an identifier
+		if (!Peek().has_value() || Peek().value().type != TokenType::IDENT)
+		{
+			std::cerr << "Invalid integer definition, expected an variable name after INT." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		auto stmt_INT_def = NodeStmtIntDef{ .IDENT = Consume() };
+		
+		// no clue if this works but at this point we know that there is an IDENT token and
+		// the way that IDENTs are created require them to be created with a value
+		// gets the value at this pointer
+		std::cout << "before empty optional" << std::endl;
+		std::string varName = *Peek().value().value;
+		std::cout << "after empty optional" << std::endl;
+
+		//std::string varName = Peek().value().value_or("sth");
+		Consume();
+
+		// check if token DNE or isn't an =
+		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
+		{
+			std::cerr << "Invalid integer definition, expected an `=` after " << varName << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		Consume();
+
+
+		if (auto expr = ParseExpr())
+		{
+			stmt_INT_def.expr = expr.value();
+		}
+		else {
+			std::cerr << "Invalid integer definition, expected integer literal or variable." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
+		{
+			std::cerr << "Invalid integer definition, expected ';'" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		return NodeStmt{ .var = stmt_INT_def };
+	}
+
+	return {};
 }
 
 std::optional<NodeProg> Parser::ParseProgram()
