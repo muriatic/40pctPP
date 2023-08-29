@@ -84,7 +84,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		}
 
 		auto stmt_INT_def = NodeStmtIntDef{ .IDENT = Consume() };
-		
+
 		// no clue if this works but at this point we know that there is an IDENT token and
 		// the way that IDENTs are created require them to be created with a value
 		// gets the value at this pointer
@@ -115,6 +115,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 			std::cerr << "Invalid integer definition, expected ';'" << std::endl;
 			exit(EXIT_FAILURE);
 		}
+
+		Consume();
 
 		return NodeStmt{ .var = stmt_INT_def };
 	}
