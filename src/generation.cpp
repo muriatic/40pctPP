@@ -23,7 +23,8 @@ public:
 			}
 			void operator()(const NodeExprIdent& expr_ident) const
 			{
-				std::cout << "Let Statement";
+				// define integer 
+				gen->m_output << "int " << expr_ident.ident.value.value() << "=";
 			}
 		};
 
