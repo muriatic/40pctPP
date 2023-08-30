@@ -65,7 +65,7 @@ public:
 
 				std::vector <std::string> vars = gen->m_vars;
 
-				if (!vars.empty() && std::find(vars.begin(), vars.end(), stmt_INT_def.IDENT.value.value()) == vars.end())
+				if (!vars.empty() && std::find(vars.begin(), vars.end(), stmt_INT_def.IDENT.value.value()) != vars.end())
 				{
 					std::cerr << "Variable " << stmt_INT_def.IDENT.value.value() << " has already been initialized and defined";
 					exit(EXIT_FAILURE);
@@ -85,6 +85,23 @@ public:
 				//stmt_INT_def.expr.var.index();
 				gen->GenExpr(stmt_INT_def.expr);
 
+
+				gen->m_output << ";\n";
+			}
+			void operator()(const NodeStmtIntAssignment& stmt_INT_assignment) const
+			{
+				std::vector<std::string> vars = gen->m_vars;
+				
+				// check if the variable hasn't been initialized or the variable list is empty
+				if (vars.empty() || std::find(vars.begin(), vars.end(), stmt_INT_assignment.IDENT.value.value()) == vars.end())
+				{
+					std::cerr << "Variable " << stmt_INT_assignment.IDENT.value.value() << " has not already been initialized and defined";
+					exit(EXIT_FAILURE);
+				}
+
+				gen->m_output << stmt_INT_assignment.IDENT.value.value() << " = ";
+
+				gen->GenExpr(stmt_INT_assignment.expr);
 
 				gen->m_output << ";\n";
 			}

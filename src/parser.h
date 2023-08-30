@@ -33,8 +33,13 @@ struct NodeStmtIntDef {
 	NodeExpr expr;
 };
 
+struct NodeStmtIntAssignment {
+	Tokens IDENT;
+	NodeExpr expr;
+};
+
 struct NodeStmt {
-	std::variant<NodeStmtReturn/*, NodeStmtExit*/, NodeStmtIntDef> var;
+	std::variant<NodeStmtReturn/*, NodeStmtExit*/, NodeStmtIntDef, NodeStmtIntAssignment> var;
 };
 
 struct NodeProg {
@@ -54,6 +59,7 @@ public:
 private:
 	std::optional <Tokens> Peek(int offset = 0) const;
 	Tokens Consume();
+	std::vector <std::string> m_idents;
 };
 
 #endif

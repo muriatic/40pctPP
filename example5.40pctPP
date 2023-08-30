@@ -1,0 +1,3 @@
+INT STH = 100;
+STH = 0;
+return (STH);

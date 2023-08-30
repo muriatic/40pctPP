@@ -71,6 +71,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 
 		return NodeStmt{ .var = stmt_return };
 	}
+	// integer definition
 	else if (Peek().value().type == TokenType::INTEGER_DEF)
 	{
 		// consume integer definition 
@@ -90,6 +91,15 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// gets the value at this pointer
 		std::string varName = *stmt_INT_def.IDENT.value;
 
+		// check if the variable has been defined before
+		if (!m_idents.empty() && std::find(m_idents.begin(), m_idents.end(), varName) != m_idents.end())
+		{
+			std::cerr << "Variable " << varName << " has already been initialized and defined";
+			exit(EXIT_FAILURE);
+		}
+
+		// add the variable name to the list of variables
+		m_idents.push_back(varName);
 
 		// check if token DNE or isn't an =
 		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
@@ -120,7 +130,59 @@ std::optional<NodeStmt> Parser::ParseStmt()
 
 		return NodeStmt{ .var = stmt_INT_def };
 	}
+	// integer redefinition
+	else if (Peek().value().type == TokenType::IDENT)
+	{
+		std::string varName;
+		
+		// check if the IDENT token doesn't have a value
+		if (!Peek().value().value.has_value())
+		{
+			std::cerr << "Error: IDENT token has no value" << std::endl;
+			exit(EXIT_FAILURE);
+		}
 
+		auto stmt_INT_assignment = NodeStmtIntAssignment{ .IDENT = Consume() };
+
+		varName = *stmt_INT_assignment.IDENT.value;
+
+		// check if this variable has been defined before
+
+		// check if the list is empty or the variable has been defined before
+		if (m_idents.empty() || std::find(m_idents.begin(), m_idents.end(), varName) == m_idents.end())
+		{
+			std::cerr << "Variable " << varName << " has not been initialized and/or defined. \nPlease define it like `INT " << varName << " = ...;`";
+			exit(EXIT_FAILURE);
+		}
+
+		// check if token DNE or isn't an =
+		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
+		{
+			std::cerr << "Invalid integer assignment, expected an `=` after " << varName << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		Consume();
+
+		if (auto expr = ParseExpr())
+		{
+			stmt_INT_assignment.expr = expr.value();
+		}
+		else {
+			std::cerr << "Invalid integer assignment, expected integer literal or variable." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
+		{
+			std::cerr << "Invalid integer assignment, expected ';'" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		Consume();
+
+		return NodeStmt{ .var = stmt_INT_assignment };
+	}
 	return {};
 }
 

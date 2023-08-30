@@ -1,4 +1,4 @@
-## Comments:
+## Comments (Not Implemented):
 Comments are single line only and are indicated with `≥≥`\
 Example: `≥≥ This is a funny comment simple`
 <hr>
@@ -23,7 +23,13 @@ Example: `INT FUNNYINTEGER = 73;`
 
 # Functions:
 
-## Writing to Console:
+## Writing to Console (Not Implemented):
 Writing to console requires using `SAYALOUD` \
 Example: `SAYALOUD, 'say, what a great function SAYALOUD is' .;`
 <hr>
+
+## Returning (Not Implemented):
+Every file must be ended with `PLEASE_STOP` or else... \
+Examples: `PLEASE_STOP`
+<hr>
+

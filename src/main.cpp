@@ -52,7 +52,6 @@ int main(int argc, char* argv[]) {
 		file << generator.GenProg();
 	}
 
-
 	return 0;
 
 	//! create file name that wont cause overriding
