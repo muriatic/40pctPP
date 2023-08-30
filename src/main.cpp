@@ -11,7 +11,7 @@
 
 int main(int argc, char* argv[]) {
 	// remove before production
-	const std::string str_types[] = {"RETURN", "INTEGER_DEF", "open_paren", "close_paren", "int_literal", "semicolon" , "ident", "equals"};
+	const std::string str_types[] = {"RETURN", "INTEGER_DEF", "open_paren", "close_paren", "int_literal", "semicolon" , "ident", "equals", "ADDITION"};
 
 	if (argc != 2) {
 		std::cerr << "40pctPP takes one argument: file name. Example..." << std::endl;

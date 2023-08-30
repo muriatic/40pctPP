@@ -80,6 +80,12 @@ std::vector <Tokens> Tokenizer::Tokenize()
 			Consume();
 			continue;
 		}
+		else if (Peek().value() == '+')
+		{
+			tokens.push_back({ .type = TokenType::ADDITION });
+			Consume();
+			continue;
+		}
 		else if (std::isspace(Peek().value()))
 		{
 			Consume();
