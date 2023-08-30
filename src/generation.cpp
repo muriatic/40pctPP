@@ -19,12 +19,17 @@ public:
 			void operator()(const NodeExprIntLit& expr_int_literal) const
 			{
 				// point to m_output << "return" << within the int literal expression, access the integer literal's value.value()
-				gen->m_output << "return " << expr_int_literal.int_lit.value.value() << ";\n";
+				//std::cout << "test" << std::endl;
+				gen->m_output << expr_int_literal.int_lit.value.value()/* << ";\n"*/;
 			}
 			void operator()(const NodeExprIdent& expr_ident) const
 			{
+				//std::cout << "int " << gen->m_vars.at(expr_ident.ident.value.value()) << std::endl;
+
+				//std::cout << "expr_ident.ident.value.value()" << expr_ident.ident.value.value() << std::endl;
 				// define integer 
-				gen->m_output << "int " << expr_ident.ident.value.value() << "=";
+				//gen->m_output << "int " << expr_ident.ident.value.value() << "=";
+				gen->m_output << expr_ident.ident.value.value();
 			}
 		};
 
@@ -46,12 +51,42 @@ public:
 			// operator when we get a NodeStmtReturn&
 			void operator()(const NodeStmtReturn& stmt_return) const
 			{
+				gen->m_output << "return ";
 				// access GenExpr from parent class
 				gen->GenExpr(stmt_return.expr);
+
+				gen->m_output << ";\n";
 			}
 			void operator()(const NodeStmtIntDef& stmt_INT_def) const
 			{
+				//gen->m_output << "int " << stmt_INT_def.IDENT.value.value() << " = " << ;
+				/*std::cout << "stmt_INT_def.IDENT.value.value()" << stmt_INT_def.IDENT.value.value() << std::endl;
+				std::cout << "stmt_INT_def.IDENT.type" << stmt_INT_def.IDENT.type << std::endl;*/
+
+				std::vector <std::string> vars = gen->m_vars;
+
+				if (!vars.empty() && std::find(vars.begin(), vars.end(), stmt_INT_def.IDENT.value.value()) == vars.end())
+				{
+					std::cerr << "Variable " << stmt_INT_def.IDENT.value.value() << " has already been initialized and defined";
+					exit(EXIT_FAILURE);
+				}
+
+				//! an INT DEF has:
+				//!		- IDENT token which has:
+				//!			- a type
+				//!			- a value (this is the variable name)
+				//!		- NodeExprIntLit expr:
+				//!			- 
+
+				gen->m_vars.push_back(stmt_INT_def.IDENT.value.value());
+				
+				gen->m_output << "int " << stmt_INT_def.IDENT.value.value() << " = ";
+
+				//stmt_INT_def.expr.var.index();
 				gen->GenExpr(stmt_INT_def.expr);
+
+
+				gen->m_output << ";\n";
 			}
 		};
 
@@ -89,7 +124,7 @@ public:
 	{
 		// need to add some function to find out what libraries are necessary
 
-		m_output << "#include <stdlib.h>\n";
+		//m_output << "#include <stdlib.h>\n";
 
 		m_output << "int main ()\n";
 		m_output << "{\n";
@@ -100,7 +135,7 @@ public:
 		}
 		// so this is up for debate, I could make it so the function always has an exit statement and doesn't hang or I could deal with this in parsing to make sure at least one 
 		// exit statement exists, i could also exit with failure or success
-		m_output << "exit(-1);\n";
+		m_output << "return -1;\n";
 		m_output << "}";
 
 		return m_output.str();
@@ -125,6 +160,7 @@ private:
 
 	const NodeProg m_prog;
 	std::stringstream m_output;
+	std::vector<std::string> m_vars;
 	//size_t m_stack_size = 0;
 	//std::unordered_map<std::string, Var> m_vars {};
 };

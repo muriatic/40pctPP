@@ -46,14 +46,14 @@ int main(int argc, char* argv[]) {
 	}
 
 
-	return 0;
-
 	Generator generator(prog.value());
 	{
 		std::fstream file("out.c", std::ios::out);
 		file << generator.GenProg();
 	}
 
+
+	return 0;
 
 	//! create file name that wont cause overriding
 	//! give user option to choose output name

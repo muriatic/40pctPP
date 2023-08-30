@@ -1,0 +1,2 @@
+INT STH = 100;
+return (STH);
