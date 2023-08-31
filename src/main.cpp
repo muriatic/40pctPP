@@ -10,9 +10,6 @@
 
 
 int main(int argc, char* argv[]) {
-	// remove before production
-	const std::string str_types[] = {"RETURN", "INTEGER_DEF", "open_paren", "close_paren", "int_literal", "semicolon" , "ident", "equals", "ADDITION"};
-
 	if (argc != 2) {
 		std::cerr << "40pctPP takes one argument: file name. Example..." << std::endl;
 		std::cerr << "40pctPP <fileName.40pctPP>" << std::endl;
@@ -31,10 +28,10 @@ int main(int argc, char* argv[]) {
 	std::vector <Tokens> tokens = tokenizer.Tokenize();
 
 	// remove before prod
-	for (int i = 0; i < tokens.size(); i++)
+	/*for (int i = 0; i < tokens.size(); i++)
 	{
 		std::cout << str_types[tokens[i].type] << std::endl;
-	}
+	}*/
 
 	Parser parser(tokens);
 	std::optional<NodeProg> prog = parser.ParseProgram();
@@ -45,14 +42,13 @@ int main(int argc, char* argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-
 	Generator generator(prog.value());
 	{
 		std::fstream file("out.c", std::ios::out);
 		file << generator.GenProg();
 	}
-
 	return 0;
+
 
 	//! create file name that wont cause overriding
 	//! give user option to choose output name

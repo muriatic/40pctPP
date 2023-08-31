@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "parser.h"
+#include "tokens.h"
 
 class Generator {
 public:
@@ -30,6 +31,48 @@ public:
 				// define integer 
 				//gen->m_output << "int " << expr_ident.ident.value.value() << "=";
 				gen->m_output << expr_ident.ident.value.value();
+			}
+			void operator()(const NodeExprChain& expr_chain) const
+			{
+				std::vector<TokenType> edgeTokens { TokenType::IDENT, TokenType::INT_LITERAL };
+				//// the first and last token must be either an INT_LITERAL or IDENT
+				////! this should be moved to parsing but ehh 
+				//if (std::find(edgeTokens.begin(), edgeTokens.end(), expr_chain.tokens[0]) == edgeTokens.end() ||
+				//	std::find(edgeTokens.begin(), edgeTokens.end(), expr_chain.tokens.back()) == edgeTokens.end())
+				//{
+				//	std::cerr << "Chained expressions must start and end with either identifiers or integer literals" << std::endl;
+				//	exit(EXIT_FAILURE);
+				//}
+
+				// kinda cheating but works
+				bool isEven = true;
+				for (int i = 0; i < expr_chain.tokens.size(); i++)
+				{
+
+					// if its an INT literal or ident and supposed to be
+					if (isEven &&
+						std::find(edgeTokens.begin(), edgeTokens.end(), expr_chain.tokens[i].type) != edgeTokens.end())
+					{
+						gen->m_output << expr_chain.tokens[i].value.value() << " ";
+					}
+
+					else if (!isEven &&
+						std::find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), expr_chain.tokens[i].type) != OperatorGroups::OperatorTokens.end())
+					{
+						// find position of operator in operator groups
+						auto it = find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), expr_chain.tokens[i].type);
+
+						int idx = it - OperatorGroups::OperatorTokens.begin();
+
+						gen->m_output << OperatorGroups::OperatorStrings[idx] << " ";
+					}
+
+					else {
+						std::cerr << "Invalid token of type: " << str_types[expr_chain.tokens[i].type] << " or order. " << std::endl;
+						exit(EXIT_FAILURE);
+					}
+					isEven = !isEven;
+				}
 			}
 		};
 

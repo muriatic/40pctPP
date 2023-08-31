@@ -5,7 +5,6 @@
 #include "parser.h"
 #include "tokens.h"
 
-
 Parser::Parser(std::vector <Tokens> tokens)
 {
 	m_tokens = tokens;
@@ -13,15 +12,35 @@ Parser::Parser(std::vector <Tokens> tokens)
 
 std::optional<NodeExpr> Parser::ParseExpr()
 {
-	if (Peek().has_value() && Peek().value().type == TokenType::INT_LITERAL)
+	std::vector <Tokens> expressionTokens;
+	while (Peek().has_value() && Peek().value().type != TokenType::SEMICOLON)
 	{
-		return NodeExpr { .var = NodeExprIntLit {.int_lit = Consume() } };
+		expressionTokens.push_back(Consume());
 	}
-	else if (Peek().has_value() && Peek().value().type == TokenType::IDENT)
+
+	if (expressionTokens.size() == 0)
 	{
-		return NodeExpr{ .var = NodeExprIdent { .ident = Consume() } };
+		std::cerr << "Error, missing expression before `;`" << std::endl;
+		exit(EXIT_FAILURE);
 	}
-	return {};
+
+	// if its a simple one token
+	if (expressionTokens.size() == 1)
+	{
+		// this may not work but im thinking do a while (Peek() != TokenType::SEMICOLON) and add everything in...
+		if (expressionTokens[0].type == TokenType::INT_LITERAL)
+		{
+			return NodeExpr{ .var = NodeExprIntLit {.int_lit = expressionTokens[0]}};
+		}
+		else if (expressionTokens[0].type == TokenType::IDENT)
+		{
+			return NodeExpr{ .var = NodeExprIdent {.ident = expressionTokens[0] } };
+		}
+
+		return {};
+	}
+
+	return NodeExpr{ .var = NodeExprChain {.tokens = expressionTokens} };
 }
 
 std::optional<NodeStmt> Parser::ParseStmt()
@@ -77,6 +96,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// consume integer definition 
 		Consume();
 
+
 		// check if either the enxt token DNE or isn't an identifier
 		if (!Peek().has_value() || Peek().value().type != TokenType::IDENT)
 		{
@@ -110,12 +130,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 
 		Consume();
 
+		//std::cout << str_types[Peek().value().type] << std::endl;
 
 		if (auto expr = ParseExpr())
 		{
 			stmt_INT_def.expr = expr.value();
 		}
 		else {
+			//std::cout << str_types[Peek().value().type] << std::endl;
 			std::cerr << "Invalid integer definition, expected integer literal or variable." << std::endl;
 			exit(EXIT_FAILURE);
 		}

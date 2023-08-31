@@ -8,8 +8,21 @@
 
 #include "tokens.h"
 
+
+// remove before production
+const std::string str_types[] = { "RETURN", "INTEGER_DEF", "open_paren", "close_paren", "int_literal", "semicolon" , "ident", "equals", "ADDITION" };
+
+
 struct NodeExprIntLit {
 	Tokens int_lit;
+};
+
+//struct OperatorExpression {
+//	std::variant<NodeExprIntLit, NodeExprIdent> var;
+//};
+
+struct NodeExprChain {
+	std::vector<Tokens> tokens;
 };
 
 struct NodeExprIdent {
@@ -17,7 +30,7 @@ struct NodeExprIdent {
 };
 
 struct NodeExpr {
-	std::variant<NodeExprIntLit, NodeExprIdent> var;
+	std::variant<NodeExprIntLit, NodeExprIdent, NodeExprChain> var;
 };
 
 //struct NodeStmtExit {
