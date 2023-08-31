@@ -22,3 +22,4 @@
 *.tlog
 \x64
 out.c
+CLOC.py
