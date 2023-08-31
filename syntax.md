@@ -25,9 +25,9 @@ Example: `INT FUNNYINTEGER = 73;`
 # Operators:
 ## Mathematical:
 - Addition -> `+`
-- Subtraction (Not Implemented) -> `-`
-- Multiplication (Not Implemented) -> `*`
-- Division (Not Implemented) -> `/`
+- Subtraction -> `-`
+- Multiplication -> `*`
+- Division -> `/`
 <hr>
 
 # Functions:
