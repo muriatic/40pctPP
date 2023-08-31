@@ -205,6 +205,23 @@ std::optional<NodeStmt> Parser::ParseStmt()
 
 		return NodeStmt{ .var = stmt_INT_assignment };
 	}
+
+	else if (Peek().value().type == TokenType::EXIT)
+	{
+		// consume exit token
+		Consume();
+
+		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
+		{
+			std::cerr << "Invalid function termination, expected ';'" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		Consume();
+
+		return NodeStmt{ .var = NodeStmtExit{} };
+	}
+
 	return {};
 }
 
@@ -217,6 +234,7 @@ std::optional<NodeProg> Parser::ParseProgram()
 			prog.stmts.push_back(stmt.value());
 			continue;
 		}
+		std::cout << Peek().value().type << std::endl;
 		std::cerr << "Invalid statement" << std::endl;
 		exit(EXIT_FAILURE);
 	}

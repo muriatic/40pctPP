@@ -53,7 +53,7 @@ public:
 					if (isEven &&
 						std::find(edgeTokens.begin(), edgeTokens.end(), expr_chain.tokens[i].type) != edgeTokens.end())
 					{
-						gen->m_output << expr_chain.tokens[i].value.value() << " ";
+						gen->m_output << " " << expr_chain.tokens[i].value.value();
 					}
 
 					else if (!isEven &&
@@ -64,7 +64,7 @@ public:
 
 						int idx = it - OperatorGroups::OperatorTokens.begin();
 
-						gen->m_output << OperatorGroups::OperatorStrings[idx] << " ";
+						gen->m_output << " " << OperatorGroups::OperatorStrings[idx];
 					}
 
 					else {
@@ -142,11 +142,16 @@ public:
 					exit(EXIT_FAILURE);
 				}
 
-				gen->m_output << stmt_INT_assignment.IDENT.value.value() << " = ";
+				gen->m_output << stmt_INT_assignment.IDENT.value.value() << " =";
 
 				gen->GenExpr(stmt_INT_assignment.expr);
 
 				gen->m_output << ";\n";
+			}
+
+			void operator()(const NodeStmtExit& stmt_exit) const
+			{
+				gen->isExit = true;
 			}
 		};
 
@@ -193,6 +198,13 @@ public:
 		{
 			GenStmt(stmt);
 		}
+
+		// check if there wasn't an exit statement
+		if (!isExit)
+		{
+			m_output << "while (1) {\n\n}\n";
+		}
+
 		// so this is up for debate, I could make it so the function always has an exit statement and doesn't hang or I could deal with this in parsing to make sure at least one 
 		// exit statement exists, i could also exit with failure or success
 		m_output << "return -1;\n";
@@ -221,6 +233,7 @@ private:
 	const NodeProg m_prog;
 	std::stringstream m_output;
 	std::vector<std::string> m_vars;
+	bool isExit = false;
 	//size_t m_stack_size = 0;
 	//std::unordered_map<std::string, Var> m_vars {};
 };

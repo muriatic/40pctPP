@@ -28,7 +28,7 @@ Writing to console requires using `SAYALOUD` \
 Example: `SAYALOUD, 'say, what a great function SAYALOUD is' .;`
 <hr>
 
-## Returning (Not Implemented):
+## Termination Statement:
 Every file must be ended with `PLEASE_STOP` or else... \
 Examples: `PLEASE_STOP`
 <hr>

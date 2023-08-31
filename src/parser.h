@@ -10,7 +10,7 @@
 
 
 // remove before production
-const std::string str_types[] = { "RETURN", "INTEGER_DEF", "open_paren", "close_paren", "int_literal", "semicolon" , "ident", "equals", "ADDITION" };
+const std::string str_types[] = { "RETURN", "INTEGER_DEF", "open_paren", "close_paren", "int_literal", "semicolon" , "ident", "equals", "ADDITION", "EXIT"};
 
 
 struct NodeExprIntLit {
@@ -33,9 +33,9 @@ struct NodeExpr {
 	std::variant<NodeExprIntLit, NodeExprIdent, NodeExprChain> var;
 };
 
-//struct NodeStmtExit {
-//	NodeExpr expr;
-//};
+struct NodeStmtExit {
+	
+};
 
 struct NodeStmtReturn {
 	NodeExpr expr;
@@ -52,7 +52,7 @@ struct NodeStmtIntAssignment {
 };
 
 struct NodeStmt {
-	std::variant<NodeStmtReturn/*, NodeStmtExit*/, NodeStmtIntDef, NodeStmtIntAssignment> var;
+	std::variant<NodeStmtReturn, NodeStmtExit, NodeStmtIntDef, NodeStmtIntAssignment> var;
 };
 
 struct NodeProg {

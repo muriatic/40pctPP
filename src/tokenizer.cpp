@@ -18,11 +18,11 @@ std::vector <Tokens> Tokenizer::Tokenize()
 
 	while (Peek().has_value())
 	{
-		if (std::isalpha(Peek().value())) 
+		if (std::isalpha(Peek().value()) || Peek().value() == '_')
 		{
 			buffer.push_back(Consume());
 			// set the buffer equal to the alphanumeric characters until something else
-			while (Peek().has_value() && std::isalnum(Peek().value())) {
+			while (Peek().has_value() && (std::isalnum(Peek().value()) || Peek().value() == '_')) {
 				buffer.push_back(Consume());
 			}
 			// evaluate the buffers
@@ -40,6 +40,14 @@ std::vector <Tokens> Tokenizer::Tokenize()
 				buffer.clear();
 				continue;
 			}
+
+			if (buffer == "PLEASE_STOP")
+			{
+				tokens.push_back({ .type = TokenType::EXIT });
+				buffer.clear();
+				continue;
+			}
+
 			tokens.push_back({ .type = TokenType::IDENT, .value = buffer });
 			buffer.clear();
 			continue;
@@ -90,6 +98,11 @@ std::vector <Tokens> Tokenizer::Tokenize()
 		{
 			Consume();
 			continue;
+		}
+		else
+		{
+			std::cerr << "Unrecognized character " << Peek().value() << std::endl;
+			exit(EXIT_FAILURE);
 		}
 	}
 
