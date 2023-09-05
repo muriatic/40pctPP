@@ -15,16 +15,24 @@ int main(int argc, char* argv[]) {
 		std::cerr << "40pctPP <fileName.40pctPP>" << std::endl;
 		return EXIT_FAILURE;
 	}
+	
+	std::string sourceFile = argv[1];
+	std::string sourceFileName;
+	{
+		size_t lastIDX = sourceFile.find_last_of("/");
+		sourceFileName = sourceFile.substr(lastIDX+1, sourceFile.length());
+	}
+	 
 
 	std::string fileContents;
 	{
 		std::stringstream contents_stream;
-		std::fstream input(argv[1], std::ios::in);
+		std::fstream input(sourceFile, std::ios::in);
 		contents_stream << input.rdbuf();
 		fileContents = contents_stream.str();
 	}
 
-	Tokenizer tokenizer(fileContents);
+	Tokenizer tokenizer(fileContents, sourceFileName);
 	std::vector <Tokens> tokens = tokenizer.Tokenize();
 
 	// remove before prod
@@ -33,7 +41,7 @@ int main(int argc, char* argv[]) {
 		std::cout << str_types[tokens[i].type] << std::endl;
 	}*/
 
-	Parser parser(tokens);
+	Parser parser(tokens, sourceFileName);
 	std::optional<NodeProg> prog = parser.ParseProgram();
 
 	if (!prog.has_value())
@@ -47,8 +55,8 @@ int main(int argc, char* argv[]) {
 		std::fstream file("out.c", std::ios::out);
 		file << generator.GenProg();
 	}
-	return 0;
 
+	return 0;
 
 	//! create file name that wont cause overriding
 	//! give user option to choose output name
@@ -58,9 +66,8 @@ int main(int argc, char* argv[]) {
 	// create outputFileName
 	std::string outputFileName;
 	{
-		std::string sourceFile = argv[1];
-		size_t lastIDX = sourceFile.find_last_of(".");
-		outputFileName = sourceFile.substr(0, lastIDX);
+		size_t lastIDX = sourceFileName.find_last_of(".");
+		outputFileName = sourceFileName.substr(0, lastIDX);
 	}
 	
 

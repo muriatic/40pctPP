@@ -5,10 +5,12 @@
 
 
 #include "tokenizer.h"
+#include "errors.h"
 
-Tokenizer::Tokenizer(std::string contents)
+Tokenizer::Tokenizer(std::string contents, std::string fileName)
 {
 	m_src = contents;
+	m_fileName = fileName;
 }
 
 std::vector <Tokens> Tokenizer::Tokenize()
@@ -29,26 +31,26 @@ std::vector <Tokens> Tokenizer::Tokenize()
 			if (buffer == "return")
 			{
 				// need to better understand this
-				tokens.push_back({ .type = TokenType::RETURN });
+				tokens.push_back({ .type = TokenType::RETURN, .coord = { lineNumber, columnNumber } });
 				buffer.clear(); 
 				continue;
 			}
 
 			if (buffer == "INT")
 			{
-				tokens.push_back({ .type = TokenType::INTEGER_DEF });
+				tokens.push_back({ .type = TokenType::INTEGER_DEF, .coord = { lineNumber, columnNumber } });
 				buffer.clear();
 				continue;
 			}
 
 			if (buffer == "PLEASE_STOP")
 			{
-				tokens.push_back({ .type = TokenType::EXIT });
+				tokens.push_back({ .type = TokenType::EXIT, .coord = { lineNumber, columnNumber } });
 				buffer.clear();
 				continue;
 			}
 
-			tokens.push_back({ .type = TokenType::IDENT, .value = buffer });
+			tokens.push_back({ .type = TokenType::IDENT, .coord = { lineNumber, columnNumber }, .value = buffer });
 			buffer.clear();
 			continue;
 		}
@@ -60,55 +62,55 @@ std::vector <Tokens> Tokenizer::Tokenize()
 				buffer.push_back(Consume());
 			}
 
-			tokens.push_back({ .type = TokenType::INT_LITERAL, .value = buffer });
+			tokens.push_back({ .type = TokenType::INT_LITERAL, .coord = { lineNumber, columnNumber }, .value = buffer });
 			buffer.clear();
 			continue;
 		}
 		else if (Peek().value() == '=')
 		{
-			tokens.push_back({ .type = TokenType::EQUALS });
+			tokens.push_back({ .type = TokenType::EQUALS, .coord = { lineNumber, columnNumber } });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '(')
 		{
-			tokens.push_back({ .type = TokenType::OPEN_PAREN });
+			tokens.push_back({ .type = TokenType::OPEN_PAREN, .coord = { lineNumber, columnNumber } });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == ')')
 		{
-			tokens.push_back({ .type = TokenType::CLOSE_PAREN });
+			tokens.push_back({ .type = TokenType::CLOSE_PAREN, .coord = { lineNumber, columnNumber } });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == ';')
 		{
-			tokens.push_back({ .type = TokenType::SEMICOLON });
+			tokens.push_back({ .type = TokenType::SEMICOLON, .coord = { lineNumber, columnNumber } });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '+')
 		{
-			tokens.push_back({ .type = TokenType::ADDITION });
+			tokens.push_back({ .type = TokenType::ADDITION, .coord = { lineNumber, columnNumber } });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '-')
 		{
-			tokens.push_back({ .type = TokenType::SUBTRACTION });
+			tokens.push_back({ .type = TokenType::SUBTRACTION, .coord = { lineNumber, columnNumber } });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '*')
 		{
-			tokens.push_back({ .type = TokenType::MULTIPLICATION });
+			tokens.push_back({ .type = TokenType::MULTIPLICATION, .coord = { lineNumber, columnNumber } });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '/')
 		{
-			tokens.push_back({ .type = TokenType::DIVISION });
+			tokens.push_back({ .type = TokenType::DIVISION, .coord = { lineNumber, columnNumber } });
 			Consume();
 			continue;
 		}
@@ -117,10 +119,20 @@ std::vector <Tokens> Tokenizer::Tokenize()
 			Consume();
 			continue;
 		}
+		else if (Peek().value() == '\n')
+		{
+			Consume();
+			lineNumber++;
+			continue;
+		}	
 		else
 		{
-			std::cerr << "Unrecognized character " << Peek().value() << std::endl;
-			exit(EXIT_FAILURE);
+			Error error{
+				.errorCode = Errors::TokenErrorCode::E0001, .errorMessage = "Unrecognized Character",
+				.coord = {lineNumber, columnNumber}, .fileName = m_fileName, .value = Peek().value()
+			};
+
+			error.raise();
 		}
 	}
 
@@ -140,5 +152,6 @@ std::vector <Tokens> Tokenizer::Tokenize()
 // gets character at current index and increments (using post increment is not ideal due to readability but it simplifies the code and performance)
 char Tokenizer::Consume()
 {
+	columnNumber++;
 	return m_src.at(m_index++);
 }

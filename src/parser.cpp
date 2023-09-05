@@ -4,24 +4,34 @@
 
 #include "parser.h"
 #include "tokens.h"
+#include "errors.h"
 
-Parser::Parser(std::vector <Tokens> tokens)
+Parser::Parser(std::vector <Tokens> tokens, std::string fileName)
 {
 	m_tokens = tokens;
+	m_fileName = fileName;
 }
 
 std::optional<NodeExpr> Parser::ParseExpr()
 {
 	std::vector <Tokens> expressionTokens;
-	while (Peek().has_value() && Peek().value().type != TokenType::SEMICOLON)
+	int index = 0;
+	//																			this addition might be bad, please note this when sth breaks ;)
+	while (Peek(index).has_value() && Peek(index).value().type != TokenType::SEMICOLON && Peek().value().type != TokenType::CLOSE_PAREN)
 	{
 		expressionTokens.push_back(Consume());
 	}
 
 	if (expressionTokens.size() == 0)
 	{
-		std::cerr << "Error, missing expression before `;`" << std::endl;
-		exit(EXIT_FAILURE);
+		Error error{
+			.errorCode = Errors::ParserErrorCode::E0101,
+			.errorMessage = "Expected Expression",
+			.coord = {lineNumber, columnNumber},
+			.fileName = m_fileName
+		};
+
+		error.raise();
 	}
 
 	// if its a simple one token
@@ -53,28 +63,43 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if either the next token doesn't exist or isnt an OPEN_PAREN
 		if (!Peek().has_value() || Peek().value().type != TokenType::OPEN_PAREN)
 		{
-			std::cerr << "Invalid exit statement, expected '(' after exit." << std::endl;
-			exit(EXIT_FAILURE);
+			Error error{
+				.errorCode = Errors::ParserErrorCode::E0102, 
+				.errorMessage = "Invalid Return Statement, Expected '(' after return",
+				.coord = {lineNumber, columnNumber}, 
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
 
 		Consume();
 
 		NodeStmtReturn stmt_return;
-
 		if (auto node_expr = ParseExpr())
 		{
 			stmt_return = { .expr = node_expr.value() };
 		}
 		else {
-			std::cerr << "Invalid Expression, expected integer literal or variable for exit code." << std::endl;
-			exit(EXIT_FAILURE);
+			Error error
+			{
+				.errorCode = Errors::ParserErrorCode::E0102,
+				.errorMessage = "Expected '('",
+				.coord = {lineNumber, columnNumber},
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
-
 		// check if either the next token doesn't exist or isnt a CLOSE_PAREN
 		if (!Peek().has_value() || Peek().value().type != TokenType::CLOSE_PAREN)
 		{
-			std::cerr << "Expected ')'" << std::endl;
-			exit(EXIT_FAILURE);
+			Error error
+			{
+				.errorCode = Errors::ParserErrorCode::E0103,
+				.errorMessage = "Expected ')'",
+				.coord = {lineNumber, columnNumber },
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
 
 		Consume();
@@ -82,8 +107,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if either the next token doesn't exist or isnt a SEMICOLON
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
-			std::cerr << "Expected ';'" << std::endl;
-			exit(EXIT_FAILURE);
+			Error error
+			{
+				.errorCode = Errors::ParserErrorCode::E0104,
+				.errorMessage = "Expected ';'",
+				.coord = {lineNumber, columnNumber },
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
 
 		Consume();
@@ -100,8 +131,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if either the enxt token DNE or isn't an identifier
 		if (!Peek().has_value() || Peek().value().type != TokenType::IDENT)
 		{
-			std::cerr << "Invalid integer definition, expected an variable name after INT." << std::endl;
-			exit(EXIT_FAILURE);
+			Error error
+			{
+				.errorCode = Errors::ParserErrorCode::E0105,
+				.errorMessage = "Invalid integer definition, expected an variable name after INT.",
+				.coord = {lineNumber, columnNumber },
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
 
 		auto stmt_INT_def = NodeStmtIntDef{ .IDENT = Consume() };
@@ -114,8 +151,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if the variable has been defined before
 		if (!m_idents.empty() && std::find(m_idents.begin(), m_idents.end(), varName) != m_idents.end())
 		{
-			std::cerr << "Variable " << varName << " has already been initialized and defined";
-			exit(EXIT_FAILURE);
+			Error error
+			{
+				.errorCode = Errors::ParserErrorCode::E0106,
+				.errorMessage = "Variable " + varName + " has already been initialized and defined",
+				.coord = {lineNumber, columnNumber },
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
 
 		// add the variable name to the list of variables
@@ -124,8 +167,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if token DNE or isn't an =
 		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
 		{
-			std::cerr << "Invalid integer definition, expected an `=` after " << varName << std::endl;
-			exit(EXIT_FAILURE);
+			Error error
+			{
+				.errorCode = Errors::ParserErrorCode::E0107,
+				.errorMessage = "Invalid integer definition, expected an '=' after " + varName,
+				.coord = {lineNumber, columnNumber },
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
 
 		Consume();
@@ -137,15 +186,26 @@ std::optional<NodeStmt> Parser::ParseStmt()
 			stmt_INT_def.expr = expr.value();
 		}
 		else {
-			//std::cout << str_types[Peek().value().type] << std::endl;
-			std::cerr << "Invalid integer definition, expected integer literal or variable." << std::endl;
-			exit(EXIT_FAILURE);
+			Error error
+			{
+				.errorCode = Errors::ParserErrorCode::E0108,
+				.errorMessage = "Invalid integer definition, expected integer literal or variable.",
+				.coord = {lineNumber, columnNumber },
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
 
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
-			std::cerr << "Invalid integer definition, expected ';'" << std::endl;
-			exit(EXIT_FAILURE);
+			Error error
+			{
+				.errorCode = Errors::ParserErrorCode::E0104,
+				.errorMessage = "Expected ';'",
+				.coord = {lineNumber, columnNumber },
+				.fileName = m_fileName
+			};
+			error.raise();
 		}
 
 		Consume();
@@ -254,5 +314,7 @@ std::optional<NodeProg> Parser::ParseProgram()
 
 Tokens Parser::Consume()
 {
+	lineNumber = m_tokens.at(m_index).coord.first;
+	columnNumber = m_tokens.at(m_index).coord.second;
 	return m_tokens.at(m_index++);
 }

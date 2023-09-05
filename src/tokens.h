@@ -13,6 +13,9 @@ enum TokenType { RETURN, INTEGER_DEF, OPEN_PAREN, CLOSE_PAREN, INT_LITERAL, SEMI
 struct Tokens
 {
 	TokenType type;
+
+	// (line number, column number)
+	std::pair<int, int> coord;
 	std::optional<std::string> value {};
 };
 
