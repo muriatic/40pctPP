@@ -1,4 +1,4 @@
-# 40pctPP
+# 40pct++
 _The Usability of BrainFuck, the Performance of Python, and Simplicity of Java. \
 Complexity is Fear_
 <hr>
