@@ -6,19 +6,19 @@
 #include <optional>
 
 #include "tokens.h"
+#include "position.h"
 
 class Tokenizer
 {
 public:
-	Tokenizer(std::string contents, std::string fileName);
+	Tokenizer(std::string contents);
 	std::vector<Tokens> Tokenize();
 
 private:
 	std::string m_src;
 	size_t m_index = 0;
 	std::optional <char> Peek(int offset = 0) const;
-	int columnNumber = 1;
-	int lineNumber = 1;
+	Position m_position{ 1,1 };
 	char Consume();
 	std::string m_fileName;
 };

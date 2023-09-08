@@ -7,6 +7,7 @@
 
 
 #include "tokens.h"
+#include "position.h"
 
 
 // remove before production
@@ -65,7 +66,7 @@ class Parser
 	std::vector <Tokens> m_tokens;
 	size_t m_index = 0;
 public:
-	Parser(std::vector <Tokens> tokens, std::string fileName);
+	Parser(std::vector <Tokens> tokens);
 	std::optional<NodeExpr> ParseExpr();
 	std::optional<NodeStmt> ParseStmt();
 	std::optional<NodeProg> ParseProgram();
@@ -73,8 +74,7 @@ private:
 	std::optional <Tokens> Peek(int offset = 0) const;
 	Tokens Consume();
 	std::vector <std::string> m_idents;
-	int lineNumber = 1;
-	int columnNumber = 1;
+	Position position{ 1, 1 };
 	std::string m_fileName;
 };
 

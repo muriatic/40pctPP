@@ -7,10 +7,9 @@
 #include "tokenizer.h"
 #include "errors.h"
 
-Tokenizer::Tokenizer(std::string contents, std::string fileName)
+Tokenizer::Tokenizer(std::string contents)
 {
 	m_src = contents;
-	m_fileName = fileName;
 }
 
 std::vector <Tokens> Tokenizer::Tokenize()
@@ -31,26 +30,26 @@ std::vector <Tokens> Tokenizer::Tokenize()
 			if (buffer == "return")
 			{
 				// need to better understand this
-				tokens.push_back({ .type = TokenType::RETURN, .coord = { lineNumber, columnNumber } });
+				tokens.push_back({ .type = TokenType::RETURN, .position = m_position });
 				buffer.clear(); 
 				continue;
 			}
 
 			if (buffer == "INT")
 			{
-				tokens.push_back({ .type = TokenType::INTEGER_DEF, .coord = { lineNumber, columnNumber } });
+				tokens.push_back({ .type = TokenType::INTEGER_DEF, .position = m_position });
 				buffer.clear();
 				continue;
 			}
 
 			if (buffer == "PLEASE_STOP")
 			{
-				tokens.push_back({ .type = TokenType::EXIT, .coord = { lineNumber, columnNumber } });
+				tokens.push_back({ .type = TokenType::EXIT, .position = m_position });
 				buffer.clear();
 				continue;
 			}
 
-			tokens.push_back({ .type = TokenType::IDENT, .coord = { lineNumber, columnNumber }, .value = buffer });
+			tokens.push_back({ .type = TokenType::IDENT, .position = m_position, .value = buffer });
 			buffer.clear();
 			continue;
 		}
@@ -62,55 +61,55 @@ std::vector <Tokens> Tokenizer::Tokenize()
 				buffer.push_back(Consume());
 			}
 
-			tokens.push_back({ .type = TokenType::INT_LITERAL, .coord = { lineNumber, columnNumber }, .value = buffer });
+			tokens.push_back({ .type = TokenType::INT_LITERAL, .position = m_position, .value = buffer });
 			buffer.clear();
 			continue;
 		}
 		else if (Peek().value() == '=')
 		{
-			tokens.push_back({ .type = TokenType::EQUALS, .coord = { lineNumber, columnNumber } });
+			tokens.push_back({ .type = TokenType::EQUALS, .position = m_position });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '(')
 		{
-			tokens.push_back({ .type = TokenType::OPEN_PAREN, .coord = { lineNumber, columnNumber } });
+			tokens.push_back({ .type = TokenType::OPEN_PAREN, .position = m_position });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == ')')
 		{
-			tokens.push_back({ .type = TokenType::CLOSE_PAREN, .coord = { lineNumber, columnNumber } });
+			tokens.push_back({ .type = TokenType::CLOSE_PAREN, .position = m_position });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == ';')
 		{
-			tokens.push_back({ .type = TokenType::SEMICOLON, .coord = { lineNumber, columnNumber } });
+			tokens.push_back({ .type = TokenType::SEMICOLON, .position = m_position });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '+')
 		{
-			tokens.push_back({ .type = TokenType::ADDITION, .coord = { lineNumber, columnNumber } });
+			tokens.push_back({ .type = TokenType::ADDITION, .position = m_position });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '-')
 		{
-			tokens.push_back({ .type = TokenType::SUBTRACTION, .coord = { lineNumber, columnNumber } });
+			tokens.push_back({ .type = TokenType::SUBTRACTION, .position = m_position });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '*')
 		{
-			tokens.push_back({ .type = TokenType::MULTIPLICATION, .coord = { lineNumber, columnNumber } });
+			tokens.push_back({ .type = TokenType::MULTIPLICATION, .position = m_position });
 			Consume();
 			continue;
 		}
 		else if (Peek().value() == '/')
 		{
-			tokens.push_back({ .type = TokenType::DIVISION, .coord = { lineNumber, columnNumber } });
+			tokens.push_back({ .type = TokenType::DIVISION, .position = m_position });
 			Consume();
 			continue;
 		}
@@ -122,17 +121,13 @@ std::vector <Tokens> Tokenizer::Tokenize()
 		else if (Peek().value() == '\n')
 		{
 			Consume();
-			lineNumber++;
+			m_position.line++;
 			continue;
 		}	
 		else
 		{
-			Error error{
-				.errorCode = Errors::TokenErrorCode::E0001, .errorMessage = "Unrecognized Character",
-				.coord = {lineNumber, columnNumber}, .fileName = m_fileName, .value = Peek().value()
-			};
-
-			error.raise();
+			E0109 error(m_position);
+			error.Raise();
 		}
 	}
 
@@ -152,6 +147,6 @@ std::vector <Tokens> Tokenizer::Tokenize()
 // gets character at current index and increments (using post increment is not ideal due to readability but it simplifies the code and performance)
 char Tokenizer::Consume()
 {
-	columnNumber++;
+	m_position.column++;
 	return m_src.at(m_index++);
 }

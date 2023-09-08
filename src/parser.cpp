@@ -6,10 +6,9 @@
 #include "tokens.h"
 #include "errors.h"
 
-Parser::Parser(std::vector <Tokens> tokens, std::string fileName)
+Parser::Parser(std::vector <Tokens> tokens)
 {
 	m_tokens = tokens;
-	m_fileName = fileName;
 }
 
 std::optional<NodeExpr> Parser::ParseExpr()
@@ -24,14 +23,8 @@ std::optional<NodeExpr> Parser::ParseExpr()
 
 	if (expressionTokens.size() == 0)
 	{
-		Error error{
-			.errorCode = Errors::ParserErrorCode::E0101,
-			.errorMessage = "Expected Expression",
-			.coord = {lineNumber, columnNumber},
-			.fileName = m_fileName
-		};
-
-		error.raise();
+		E0101 error(position);
+		error.Raise();
 	}
 
 	// if its a simple one token
@@ -63,13 +56,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if either the next token doesn't exist or isnt an OPEN_PAREN
 		if (!Peek().has_value() || Peek().value().type != TokenType::OPEN_PAREN)
 		{
-			Error error{
-				.errorCode = Errors::ParserErrorCode::E0102, 
-				.errorMessage = "Invalid Return Statement, Expected '(' after return",
-				.coord = {lineNumber, columnNumber}, 
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0102 error(position, "Invalid Return Statement, Expected '(' after return");
+			error.Raise();
 		}
 
 		Consume();
@@ -80,26 +68,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 			stmt_return = { .expr = node_expr.value() };
 		}
 		else {
-			Error error
-			{
-				.errorCode = Errors::ParserErrorCode::E0102,
-				.errorMessage = "Expected '('",
-				.coord = {lineNumber, columnNumber},
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0102 error(position);
+			error.Raise();
 		}
 		// check if either the next token doesn't exist or isnt a CLOSE_PAREN
 		if (!Peek().has_value() || Peek().value().type != TokenType::CLOSE_PAREN)
 		{
-			Error error
-			{
-				.errorCode = Errors::ParserErrorCode::E0103,
-				.errorMessage = "Expected ')'",
-				.coord = {lineNumber, columnNumber },
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0103 error(position);
+			error.Raise();
 		}
 
 		Consume();
@@ -107,14 +83,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if either the next token doesn't exist or isnt a SEMICOLON
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
-			Error error
-			{
-				.errorCode = Errors::ParserErrorCode::E0104,
-				.errorMessage = "Expected ';'",
-				.coord = {lineNumber, columnNumber },
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0104 error(position);
+			error.Raise();
 		}
 
 		Consume();
@@ -131,14 +101,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if either the enxt token DNE or isn't an identifier
 		if (!Peek().has_value() || Peek().value().type != TokenType::IDENT)
 		{
-			Error error
-			{
-				.errorCode = Errors::ParserErrorCode::E0105,
-				.errorMessage = "Invalid integer definition, expected an variable name after INT.",
-				.coord = {lineNumber, columnNumber },
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0105 error(position, E0105::ErrorTypes::NO_VAR_NAME);
+			error.Raise();
 		}
 
 		auto stmt_INT_def = NodeStmtIntDef{ .IDENT = Consume() };
@@ -151,14 +115,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if the variable has been defined before
 		if (!m_idents.empty() && std::find(m_idents.begin(), m_idents.end(), varName) != m_idents.end())
 		{
-			Error error
-			{
-				.errorCode = Errors::ParserErrorCode::E0106,
-				.errorMessage = "Variable " + varName + " has already been initialized and defined",
-				.coord = {lineNumber, columnNumber },
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0105 error(position, E0105::ErrorTypes::ALREADY_DEFINED, varName);
+			error.Raise();
 		}
 
 		// add the variable name to the list of variables
@@ -167,14 +125,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if token DNE or isn't an =
 		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
 		{
-			Error error
-			{
-				.errorCode = Errors::ParserErrorCode::E0107,
-				.errorMessage = "Invalid integer definition, expected an '=' after " + varName,
-				.coord = {lineNumber, columnNumber },
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0105 error(position, E0105::ErrorTypes::NO_EQUALS, varName);
+			error.Raise();
 		}
 
 		Consume();
@@ -186,26 +138,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 			stmt_INT_def.expr = expr.value();
 		}
 		else {
-			Error error
-			{
-				.errorCode = Errors::ParserErrorCode::E0108,
-				.errorMessage = "Invalid integer definition, expected integer literal or variable.",
-				.coord = {lineNumber, columnNumber },
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0105 error(position, E0105::ErrorTypes::EXPECT_INT_LITERAL);
+			error.Raise();
 		}
 
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
-			Error error
-			{
-				.errorCode = Errors::ParserErrorCode::E0104,
-				.errorMessage = "Expected ';'",
-				.coord = {lineNumber, columnNumber },
-				.fileName = m_fileName
-			};
-			error.raise();
+			E0105 error(position, E0105::ErrorTypes::EXPECT_SEMICOLON);
+			error.Raise();
 		}
 
 		Consume();
@@ -220,8 +160,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if the IDENT token doesn't have a value
 		if (!Peek().value().value.has_value())
 		{
-			std::cerr << "Error: IDENT token has no value" << std::endl;
-			exit(EXIT_FAILURE);
+			E0106 error(position, E0106::ErrorTypes::NO_IDENT);
+			error.Raise();
 		}
 
 		auto stmt_INT_assignment = NodeStmtIntAssignment{ .IDENT = Consume() };
@@ -233,15 +173,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if the list is empty or the variable has been defined before
 		if (m_idents.empty() || std::find(m_idents.begin(), m_idents.end(), varName) == m_idents.end())
 		{
-			std::cerr << "Variable " << varName << " has not been initialized and/or defined. \nPlease define it like `INT " << varName << " = ...;`";
-			exit(EXIT_FAILURE);
+			E0106 error(position, E0106::ErrorTypes::VAR_NOT_INITIALIZED, varName);
+			error.Raise();
 		}
 
 		// check if token DNE or isn't an =
 		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
 		{
-			std::cerr << "Invalid integer assignment, expected an `=` after " << varName << std::endl;
-			exit(EXIT_FAILURE);
+			E0106 error(position, E0106::ErrorTypes::NO_EQUAL, varName);
 		}
 
 		Consume();
@@ -251,14 +190,14 @@ std::optional<NodeStmt> Parser::ParseStmt()
 			stmt_INT_assignment.expr = expr.value();
 		}
 		else {
-			std::cerr << "Invalid integer assignment, expected integer literal or variable." << std::endl;
-			exit(EXIT_FAILURE);
+			E0106 error(position, E0106::ErrorTypes::EXPECTED_INT_LITERAL);
+			error.Raise();
 		}
 
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
-			std::cerr << "Invalid integer assignment, expected ';'" << std::endl;
-			exit(EXIT_FAILURE);
+			E0106 error(position, E0106::ErrorTypes::EXPECTED_SEMICOLON);
+			error.Raise();
 		}
 
 		Consume();
@@ -273,8 +212,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
-			std::cerr << "Invalid function termination, expected ';'" << std::endl;
-			exit(EXIT_FAILURE);
+			E0107 error(position);
+			error.Raise();
 		}
 
 		Consume();
@@ -294,9 +233,8 @@ std::optional<NodeProg> Parser::ParseProgram()
 			prog.stmts.push_back(stmt.value());
 			continue;
 		}
-		std::cout << Peek().value().type << std::endl;
-		std::cerr << "Invalid statement" << std::endl;
-		exit(EXIT_FAILURE);
+		E0108 error(position);
+		error.Raise();
 	}
 
 	return prog;
@@ -314,7 +252,7 @@ std::optional<NodeProg> Parser::ParseProgram()
 
 Tokens Parser::Consume()
 {
-	lineNumber = m_tokens.at(m_index).coord.first;
-	columnNumber = m_tokens.at(m_index).coord.second;
+	position.line = m_tokens.at(m_index).position.line;
+	position.column = m_tokens.at(m_index).position.column;
 	return m_tokens.at(m_index++);
 }

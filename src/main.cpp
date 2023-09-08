@@ -7,7 +7,10 @@
 #include "tokenizer.h"
 #include "parser.h"
 #include "generation.cpp"
+#include "errors.h"
 
+
+std::string Errors::fileName;
 
 int main(int argc, char* argv[]) {
 	if (argc != 2) {
@@ -22,7 +25,8 @@ int main(int argc, char* argv[]) {
 		size_t lastIDX = sourceFile.find_last_of("/");
 		sourceFileName = sourceFile.substr(lastIDX+1, sourceFile.length());
 	}
-	 
+	
+	Errors::fileName = sourceFileName;
 
 	std::string fileContents;
 	{
@@ -32,7 +36,7 @@ int main(int argc, char* argv[]) {
 		fileContents = contents_stream.str();
 	}
 
-	Tokenizer tokenizer(fileContents, sourceFileName);
+	Tokenizer tokenizer(fileContents);
 	std::vector <Tokens> tokens = tokenizer.Tokenize();
 
 	// remove before prod
@@ -41,7 +45,7 @@ int main(int argc, char* argv[]) {
 		std::cout << str_types[tokens[i].type] << std::endl;
 	}*/
 
-	Parser parser(tokens, sourceFileName);
+	Parser parser(tokens);
 	std::optional<NodeProg> prog = parser.ParseProgram();
 
 	if (!prog.has_value())
