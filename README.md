@@ -1,5 +1,5 @@
 # 40pct++
-_The Usability of BrainFuck, the Performance of Python, and Simplicity of Java. \
+_The Usability of [BrainFuck](https://en.wikipedia.org/wiki/Brainfuck), the Performance of [Python](https://wiki.python.org/moin/GlobalInterpreterLock), and Simplicity of [Java](https://www.cs.princeton.edu/courses/archive/spr96/cs333/java/tutorial/java/anatomy/main.html). \
 Complexity is Fear_
 <hr>
 <br>
