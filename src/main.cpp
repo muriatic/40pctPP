@@ -60,7 +60,6 @@ int main(int argc, char* argv[]) {
 		file << generator.GenProg();
 	}
 
-	return 0;
 
 	//! create file name that wont cause overriding
 	//! give user option to choose output name
@@ -74,6 +73,7 @@ int main(int argc, char* argv[]) {
 		outputFileName = sourceFileName.substr(0, lastIDX);
 	}
 	
+	return 0;
 
 	std::string command = compiler +  " -o " + outputFileName + " " + CfileName;
 	

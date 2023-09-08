@@ -215,26 +215,8 @@ public:
 	}
 
 private:
-	/*void push(const std::string& reg)
-	{
-		m_output << "    push " << reg << "\n";
-		m_stack_size++;
-	}
-
-	void pop(const std::string& reg)
-	{
-		m_output << "    pop " << reg << "\n";
-		m_stack_size--;
-	}
-
-	struct Var {
-		size_t stack_loc;
-	};*/
-
 	const NodeProg m_prog;
 	std::stringstream m_output;
 	std::vector<std::string> m_vars;
 	bool isExit = false;
-	//size_t m_stack_size = 0;
-	//std::unordered_map<std::string, Var> m_vars {};
 };
