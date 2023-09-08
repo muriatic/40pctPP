@@ -5,6 +5,7 @@
 
 #include "parser.h"
 #include "tokens.h"
+#include "errors.h"
 
 class Generator {
 public:
@@ -68,8 +69,8 @@ public:
 					}
 
 					else {
-						std::cerr << "Invalid token of type: " << str_types[expr_chain.tokens[i].type] << " or order. " << std::endl;
-						exit(EXIT_FAILURE);
+						E0201 error(expr_chain.tokens[i].position, str_types[expr_chain.tokens[i].type]);
+						error.Raise();
 					}
 					isEven = !isEven;
 				}
@@ -110,8 +111,8 @@ public:
 
 				if (!vars.empty() && std::find(vars.begin(), vars.end(), stmt_INT_def.IDENT.value.value()) != vars.end())
 				{
-					std::cerr << "Variable " << stmt_INT_def.IDENT.value.value() << " has already been initialized and defined";
-					exit(EXIT_FAILURE);
+					E0202 error(stmt_INT_def.IDENT.position, stmt_INT_def.IDENT.value.value());
+					error.Raise();
 				}
 
 				//! an INT DEF has:
@@ -138,8 +139,8 @@ public:
 				// check if the variable hasn't been initialized or the variable list is empty
 				if (vars.empty() || std::find(vars.begin(), vars.end(), stmt_INT_assignment.IDENT.value.value()) == vars.end())
 				{
-					std::cerr << "Variable " << stmt_INT_assignment.IDENT.value.value() << " has not already been initialized and defined";
-					exit(EXIT_FAILURE);
+					E0202 error(stmt_INT_assignment.IDENT.position, stmt_INT_assignment.IDENT.value.value());
+					error.Raise();
 				}
 
 				gen->m_output << stmt_INT_assignment.IDENT.value.value() << " =";

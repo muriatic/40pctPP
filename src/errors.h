@@ -7,6 +7,10 @@
 #include <variant>
 
 
+// remove before production
+const std::string str_types[] = { "RETURN", "INTEGER_DEF", "open_paren", "close_paren", "int_literal", "semicolon" , "ident", "equals", "ADDITION", "EXIT" };
+
+
 struct Errors
 {
     Errors(std::string val = "")
@@ -249,6 +253,57 @@ struct E0109 : Errors
         if (customErrorMessage == "")
         {
             m_errorMessage = "Unrecognized Character";
+        }
+    }
+};
+
+// Invalid token or order
+struct E0201 : Errors
+{
+    E0201(Position coord, std::string val, std::string customErrorMessage = "")
+        : Errors()
+    {
+        m_coord = coord;
+        errorCode = __func__;
+
+        m_errorMessage = customErrorMessage;
+        if (customErrorMessage == "")
+        {
+            m_errorMessage = "Invalid token of type: " + val + " or order. ";
+        }
+    }
+};
+
+// variable has already been initialized or defined
+struct E0202 : Errors
+{
+    E0202(Position coord, std::string val, std::string customErrorMessage = "")
+        : Errors()
+    {
+        m_coord = coord;
+        errorCode = __func__;
+
+        m_errorMessage = customErrorMessage;
+        if (customErrorMessage == "")
+        {
+            m_errorMessage = "Variable " + val + " has already been initialized and defined";
+        }
+    }
+};
+
+// variable has not already been initialized or defined
+struct E0203 : Errors
+{
+    E0203(Position coord, std::string val, std::string customErrorMessage = "")
+        : Errors()
+    {
+        m_coord = coord;
+        errorCode = __func__;
+
+        m_errorMessage = customErrorMessage;
+        if (customErrorMessage == "")
+        {
+            m_errorMessage = "Variable " + val + " has not already been initialized and defined";
         }
     }
 };

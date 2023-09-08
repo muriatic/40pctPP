@@ -10,10 +10,6 @@
 #include "position.h"
 
 
-// remove before production
-const std::string str_types[] = { "RETURN", "INTEGER_DEF", "open_paren", "close_paren", "int_literal", "semicolon" , "ident", "equals", "ADDITION", "EXIT"};
-
-
 struct NodeExprIntLit {
 	Tokens int_lit;
 };
