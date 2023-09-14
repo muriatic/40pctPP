@@ -1,6 +1,5 @@
 ### Tokenizer Errors 0001-0100:
 - E0001 &rarr; Unrecognized Character 
-- E0099 &rarr; ...
 
 ### Parser Errors 0101-0200:
 - E0101 &rarr; Expected Expression
