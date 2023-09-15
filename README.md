@@ -3,7 +3,7 @@ _The Usability of [BrainFuck](https://en.wikipedia.org/wiki/Brainfuck), the Perf
 Complexity is Fear_
 <hr>
 <br>
-A simple programming language written for 40 % keyboards 
+A simple programming language written for 40 % keyboards with the hopes of teaching me C++
 
 
 ## NOTICE:
