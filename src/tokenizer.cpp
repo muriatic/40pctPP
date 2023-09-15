@@ -126,8 +126,7 @@ std::vector <Tokens> Tokenizer::Tokenize()
 		}	
 		else
 		{
-			E0109 error(m_position);
-			error.Raise();
+			E0101 error(m_position);
 		}
 	}
 
