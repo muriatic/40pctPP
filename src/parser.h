@@ -18,8 +18,10 @@ struct NodeExprIntLit {
 //	std::variant<NodeExprIntLit, NodeExprIdent> var;
 //};
 
-struct NodeExprChain {
-	std::vector<Tokens> tokens;
+struct NodeExprOperator
+{
+	//
+	Tokens Operation;
 };
 
 struct NodeExprIdent {
@@ -27,7 +29,8 @@ struct NodeExprIdent {
 };
 
 struct NodeExpr {
-	std::variant<NodeExprIntLit, NodeExprIdent, NodeExprChain> var;
+	std::vector<std::variant<NodeExpr, NodeExprIntLit, NodeExprIdent, NodeExprOperator>> var;
+	//std::variant<NodeExprIntLit, NodeExprIdent> var;
 };
 
 struct NodeStmtExit {
@@ -69,9 +72,11 @@ public:
 private:
 	std::optional <Tokens> Peek(int offset = 0) const;
 	Tokens Consume();
+	bool CheckParentheses();
 	std::vector <std::string> m_idents;
 	Position position{ 1, 1 };
 	std::string m_fileName;
+	int parentheses = 0;
 };
 
 #endif

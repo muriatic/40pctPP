@@ -11,39 +11,98 @@ Parser::Parser(std::vector <Tokens> tokens)
 	m_tokens = tokens;
 }
 
+bool Parser::CheckParentheses()
+{
+	return (parentheses >= 0) ? true : false;
+}
+
 std::optional<NodeExpr> Parser::ParseExpr()
 {
-	std::vector <Tokens> expressionTokens;
-	int index = 0;
-	//																			this addition might be bad, please note this when sth breaks ;)
-	while (Peek(index).has_value() && Peek(index).value().type != TokenType::SEMICOLON && Peek().value().type != TokenType::CLOSE_PAREN)
+	NodeExpr expr;
+	while (Peek().has_value() && Peek().value().type != TokenType::SEMICOLON )
 	{
-		expressionTokens.push_back(Consume());
-	}
-
-	if (expressionTokens.size() == 0)
-	{
-		E0101 error(position);
-		error.Raise();
-	}
-
-	// if its a simple one token
-	if (expressionTokens.size() == 1)
-	{
-		// this may not work but im thinking do a while (Peek() != TokenType::SEMICOLON) and add everything in...
-		if (expressionTokens[0].type == TokenType::INT_LITERAL)
+		if (Peek().value().type == TokenType::OPEN_PAREN)
 		{
-			return NodeExpr{ .var = NodeExprIntLit {.int_lit = expressionTokens[0]}};
+			Consume();
+			parentheses++;
+			expr.var.push_back(ParseExpr().value());
+			continue;
 		}
-		else if (expressionTokens[0].type == TokenType::IDENT)
+		else if (Peek().value().type == TokenType::IDENT)
 		{
-			return NodeExpr{ .var = NodeExprIdent {.ident = expressionTokens[0] } };
+			expr.var.push_back(NodeExprIdent{.ident = Consume()});
+			continue;
 		}
-
-		return {};
+		else if (Peek().value().type == TokenType::INT_LITERAL)
+		{
+			expr.var.push_back(NodeExprIntLit{.int_lit= Consume()});
+			continue;
+		}
+		else if (Peek().value().type == TokenType::CLOSE_PAREN)
+		{
+			Consume();
+			parentheses--;
+			if (CheckParentheses())
+			{
+				return expr;
+			}
+			E0111 error(position, parentheses);
+		}
+		else if (std::find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), Peek().value().type) != OperatorGroups::OperatorTokens.end())
+		{
+			expr.var.push_back(NodeExprOperator{ .Operation = Consume() });
+			continue;
+		}
+		else if (Peek().value().type == TokenType::EQUALS)
+		{
+			E0110 error(position);
+			
+		}
+		E0109 error(position, Peek().value().type);
+		
 	}
 
-	return NodeExpr{ .var = NodeExprChain {.tokens = expressionTokens} };
+	if (parentheses != 0)
+	{
+		E0111 error(position, parentheses);
+	}
+
+	return expr;
+	
+	
+
+
+	/*while (Peek().has_value())
+	{
+		if (Peek().value() == TokenType::OPEN_PAREN)
+		{
+
+		}
+	}*/
+
+	//if (expressionTokens.size() == 0)
+	//{
+	//	E0101 error(position);
+	//	
+	//}
+
+	//// if its a simple one token
+	//if (expressionTokens.size() == 1)
+	//{
+	//	// this may not work but im thinking do a while (Peek() != TokenType::SEMICOLON) and add everything in...
+	//	if (expressionTokens[0].type == TokenType::INT_LITERAL)
+	//	{
+	//		return NodeExpr{ .var = NodeExprIntLit {.int_lit = expressionTokens[0]}};
+	//	}
+	//	else if (expressionTokens[0].type == TokenType::IDENT)
+	//	{
+	//		return NodeExpr{ .var = NodeExprIdent {.ident = expressionTokens[0] } };
+	//	}
+
+	//	return {};
+	//}
+
+	//return NodeExpr{ .var = NodeExprChain {.tokens = expressionTokens} };
 }
 
 std::optional<NodeStmt> Parser::ParseStmt()
@@ -57,9 +116,8 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (!Peek().has_value() || Peek().value().type != TokenType::OPEN_PAREN)
 		{
 			E0102 error(position, "Invalid Return Statement, Expected '(' after return");
-			error.Raise();
+			
 		}
-
 		Consume();
 
 		NodeStmtReturn stmt_return;
@@ -69,13 +127,13 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		}
 		else {
 			E0102 error(position);
-			error.Raise();
+			
 		}
 		// check if either the next token doesn't exist or isnt a CLOSE_PAREN
 		if (!Peek().has_value() || Peek().value().type != TokenType::CLOSE_PAREN)
 		{
 			E0103 error(position);
-			error.Raise();
+			
 		}
 
 		Consume();
@@ -84,7 +142,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
 			E0104 error(position);
-			error.Raise();
+			
 		}
 
 		Consume();
@@ -102,7 +160,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (!Peek().has_value() || Peek().value().type != TokenType::IDENT)
 		{
 			E0105 error(position, E0105::ErrorTypes::NO_VAR_NAME);
-			error.Raise();
+			
 		}
 
 		auto stmt_INT_def = NodeStmtIntDef{ .IDENT = Consume() };
@@ -116,7 +174,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (!m_idents.empty() && std::find(m_idents.begin(), m_idents.end(), varName) != m_idents.end())
 		{
 			E0105 error(position, E0105::ErrorTypes::ALREADY_DEFINED, varName);
-			error.Raise();
+			
 		}
 
 		// add the variable name to the list of variables
@@ -126,7 +184,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
 		{
 			E0105 error(position, E0105::ErrorTypes::NO_EQUALS, varName);
-			error.Raise();
+			
 		}
 
 		Consume();
@@ -139,13 +197,13 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		}
 		else {
 			E0105 error(position, E0105::ErrorTypes::EXPECT_INT_LITERAL);
-			error.Raise();
+			
 		}
 
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
 			E0105 error(position, E0105::ErrorTypes::EXPECT_SEMICOLON);
-			error.Raise();
+			
 		}
 
 		Consume();
@@ -161,7 +219,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (!Peek().value().value.has_value())
 		{
 			E0106 error(position, E0106::ErrorTypes::NO_IDENT);
-			error.Raise();
+			
 		}
 
 		auto stmt_INT_assignment = NodeStmtIntAssignment{ .IDENT = Consume() };
@@ -174,7 +232,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (m_idents.empty() || std::find(m_idents.begin(), m_idents.end(), varName) == m_idents.end())
 		{
 			E0106 error(position, E0106::ErrorTypes::VAR_NOT_INITIALIZED, varName);
-			error.Raise();
+			
 		}
 
 		// check if token DNE or isn't an =
@@ -191,13 +249,13 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		}
 		else {
 			E0106 error(position, E0106::ErrorTypes::EXPECTED_INT_LITERAL);
-			error.Raise();
+			
 		}
 
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
 			E0106 error(position, E0106::ErrorTypes::EXPECTED_SEMICOLON);
-			error.Raise();
+			
 		}
 
 		Consume();
@@ -213,7 +271,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
 		{
 			E0107 error(position);
-			error.Raise();
+			
 		}
 
 		Consume();
@@ -234,7 +292,7 @@ std::optional<NodeProg> Parser::ParseProgram()
 			continue;
 		}
 		E0108 error(position);
-		error.Raise();
+		
 	}
 
 	return prog;

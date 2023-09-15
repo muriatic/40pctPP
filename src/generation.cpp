@@ -20,68 +20,41 @@ public:
 			// if the expression has an integer literal
 			void operator()(const NodeExprIntLit& expr_int_literal) const
 			{
-				// point to m_output << "return" << within the int literal expression, access the integer literal's value.value()
-				//std::cout << "test" << std::endl;
-				gen->m_output << expr_int_literal.int_lit.value.value()/* << ";\n"*/;
+				gen->m_output << expr_int_literal.int_lit.value.value();
 			}
 			void operator()(const NodeExprIdent& expr_ident) const
 			{
-				//std::cout << "int " << gen->m_vars.at(expr_ident.ident.value.value()) << std::endl;
-
-				//std::cout << "expr_ident.ident.value.value()" << expr_ident.ident.value.value() << std::endl;
-				// define integer 
-				//gen->m_output << "int " << expr_ident.ident.value.value() << "=";
 				gen->m_output << expr_ident.ident.value.value();
 			}
-			void operator()(const NodeExprChain& expr_chain) const
+			void operator()(const NodeExprOperator& expr_operator) const
 			{
-				std::vector<TokenType> edgeTokens { TokenType::IDENT, TokenType::INT_LITERAL };
-				//// the first and last token must be either an INT_LITERAL or IDENT
-				////! this should be moved to parsing but ehh 
-				//if (std::find(edgeTokens.begin(), edgeTokens.end(), expr_chain.tokens[0]) == edgeTokens.end() ||
-				//	std::find(edgeTokens.begin(), edgeTokens.end(), expr_chain.tokens.back()) == edgeTokens.end())
-				//{
-				//	std::cerr << "Chained expressions must start and end with either identifiers or integer literals" << std::endl;
-				//	exit(EXIT_FAILURE);
-				//}
+				auto it = find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), expr_operator.Operation.type);
 
-				// kinda cheating but works
-				bool isEven = true;
-				for (int i = 0; i < expr_chain.tokens.size(); i++)
+				int idx = it - OperatorGroups::OperatorTokens.begin();
+
+				gen->m_output << " " << OperatorGroups::OperatorStrings[idx] << " ";
+			}
+			void operator()(const NodeExpr& expr) const
+			{
+				gen->m_output << "(";
+				for (int i = 0; i < expr.var.size(); i++)
 				{
-
-					// if its an INT literal or ident and supposed to be
-					if (isEven &&
-						std::find(edgeTokens.begin(), edgeTokens.end(), expr_chain.tokens[i].type) != edgeTokens.end())
-					{
-						gen->m_output << " " << expr_chain.tokens[i].value.value();
-					}
-
-					else if (!isEven &&
-						std::find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), expr_chain.tokens[i].type) != OperatorGroups::OperatorTokens.end())
-					{
-						// find position of operator in operator groups
-						auto it = find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), expr_chain.tokens[i].type);
-
-						int idx = it - OperatorGroups::OperatorTokens.begin();
-
-						gen->m_output << " " << OperatorGroups::OperatorStrings[idx];
-					}
-
-					else {
-						E0201 error(expr_chain.tokens[i].position, str_types[expr_chain.tokens[i].type]);
-						error.Raise();
-					}
-					isEven = !isEven;
+					ExprVisitor visitor{ .gen = gen };
+					std::visit(visitor, expr.var[i]);
 				}
+				gen->m_output << ")";
 			}
 		};
 
 		// send in the value of gen as the current instance of this class
-		ExprVisitor visitor { .gen = this };
 
 		// visit based on which type of expr this is
-		std::visit(visitor, expr.var);
+		for (int i = 0; i < expr.var.size(); i++)
+		{
+			//std::cout << expr.var[i].index() << std::endl;
+			ExprVisitor visitor { .gen = this };
+			std::visit(visitor, expr.var[i]);
+		}
 	}
 
 	void GenStmt(const NodeStmt& stmt)
