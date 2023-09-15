@@ -68,41 +68,6 @@ std::optional<NodeExpr> Parser::ParseExpr()
 	}
 
 	return expr;
-	
-	
-
-
-	/*while (Peek().has_value())
-	{
-		if (Peek().value() == TokenType::OPEN_PAREN)
-		{
-
-		}
-	}*/
-
-	//if (expressionTokens.size() == 0)
-	//{
-	//	E0101 error(position);
-	//	
-	//}
-
-	//// if its a simple one token
-	//if (expressionTokens.size() == 1)
-	//{
-	//	// this may not work but im thinking do a while (Peek() != TokenType::SEMICOLON) and add everything in...
-	//	if (expressionTokens[0].type == TokenType::INT_LITERAL)
-	//	{
-	//		return NodeExpr{ .var = NodeExprIntLit {.int_lit = expressionTokens[0]}};
-	//	}
-	//	else if (expressionTokens[0].type == TokenType::IDENT)
-	//	{
-	//		return NodeExpr{ .var = NodeExprIdent {.ident = expressionTokens[0] } };
-	//	}
-
-	//	return {};
-	//}
-
-	//return NodeExpr{ .var = NodeExprChain {.tokens = expressionTokens} };
 }
 
 std::optional<NodeStmt> Parser::ParseStmt()
