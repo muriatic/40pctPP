@@ -55,6 +55,8 @@ struct E0001 : Errors
         {
             m_errorMessage = "Unrecognized character " + quoteCharacter + val + quoteCharacter;
         }
+
+        Raise();
     }
 };
 
@@ -71,6 +73,8 @@ struct E0101 : Errors
         {
             m_errorMessage = "Expected Expression";
         }
+
+        Raise();
     }
 };
 
@@ -87,6 +91,8 @@ struct E0102 : Errors
         {
             m_errorMessage = "Expected '('";
         }
+
+        Raise();
     }
 };
 
@@ -103,6 +109,8 @@ struct E0103 : Errors
         {
             m_errorMessage = "Expected ')'";
         }
+
+        Raise();
     }
 };
 
@@ -119,6 +127,8 @@ struct E0104 : Errors
         {
             m_errorMessage = "Expected ';'";
         }
+
+        Raise();
     }
 };
 
@@ -159,6 +169,8 @@ struct E0105 : Errors
         {
             m_errorMessage = "Invalid integer definition, expected ';'";
         }
+
+        Raise();
     }
 };
 
@@ -203,6 +215,8 @@ struct E0106 : Errors
         {
             m_errorMessage = "Invalid integer assignment, expected ';'";
         }
+
+        Raise();
     }
 };
 
@@ -220,6 +234,8 @@ struct E0107 : Errors
         {
             m_errorMessage = "Invalid function termination, expected ';'";
         }
+
+        Raise();
     }
 };
 
@@ -237,13 +253,15 @@ struct E0108 : Errors
         {
             m_errorMessage = "Invalid statement";
         }
+
+        Raise();
     }
 };
 
-// unrecognized Character
+// unrecognized Token
 struct E0109 : Errors
 {
-    E0109(Position coord, std::string customErrorMessage = "")
+    E0109(Position coord, int tokenType, std::string customErrorMessage = "")
         : Errors()
     {
         m_coord = coord;
@@ -252,8 +270,50 @@ struct E0109 : Errors
         m_errorMessage = customErrorMessage;
         if (customErrorMessage == "")
         {
-            m_errorMessage = "Unrecognized Character";
+            m_errorMessage = "Unrecognized Token of type: " + str_types[tokenType];
         }
+
+        Raise();
+    }
+};
+
+// Unexpected integer assignment within expression
+struct E0110 : Errors
+{
+    E0110(Position coord, std::string customErrorMessage = "")
+        : Errors()
+    {
+        m_coord = coord;
+        errorCode = __func__;
+
+        m_errorMessage = customErrorMessage;
+        if (customErrorMessage == "")
+        {
+            m_errorMessage = "Unexpected integer assignment within expression";
+        }
+
+        Raise();
+    }
+};
+
+// lack of matching parentheses
+struct E0111 : Errors
+{
+    E0111(Position coord, int quantity,  std::string customErrorMessage = "")
+        : Errors()
+    {
+        m_coord = coord;
+        errorCode = __func__;
+
+        m_errorMessage = customErrorMessage;
+        char parentheseType = ')';
+        if (quantity > 0)
+        {
+            parentheseType = '(';
+        }
+        m_errorMessage = "Lack of Matching Parentheses: " + std::to_string(abs(quantity)) + " too many '" + parentheseType + "'";
+
+        Raise();
     }
 };
 
@@ -271,6 +331,8 @@ struct E0201 : Errors
         {
             m_errorMessage = "Invalid token of type: " + val + " or order. ";
         }
+
+        Raise();
     }
 };
 
@@ -288,6 +350,8 @@ struct E0202 : Errors
         {
             m_errorMessage = "Variable " + val + " has already been initialized and defined";
         }
+
+        Raise();
     }
 };
 
@@ -305,6 +369,8 @@ struct E0203 : Errors
         {
             m_errorMessage = "Variable " + val + " has not already been initialized and defined";
         }
+
+        Raise();
     }
 };
 
