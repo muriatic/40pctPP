@@ -50,6 +50,19 @@ std::optional<NodeExpr> Parser::ParseExpr()
 		}
 		else if (std::find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), Peek().value().type) != OperatorGroups::OperatorTokens.end())
 		{
+			// check for duplicate operators (checks if current operator and next token are the same
+			if (Peek().value().type == Peek(1).value().type)
+			{
+				E0112 error(position, E0112::ErrorTypes::DUPLICATE);
+			}
+
+			// if its not addition or subtraction just push it back and we're good
+			if (
+				(Peek().value().type == TokenType::ADDITION || Peek().value().type == TokenType::SUBTRACTION) 
+				&& (Peek(1).value().type == TokenType::MULTIPLICATION || Peek(1).value().type == TokenType::DIVISION)) {
+				E0112 error(position, E0112::ErrorTypes::ORDER);
+			}
+
 			expr.var.push_back(NodeExprOperator{ .Operation = Consume() });
 			continue;
 		}

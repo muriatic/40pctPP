@@ -188,6 +188,7 @@ struct E0106 : Errors
         m_errorMessage = customErrorMessage;
         if (customErrorMessage != "")
         {
+            Raise();
             return;
         }
 
@@ -299,7 +300,7 @@ struct E0110 : Errors
 // lack of matching parentheses
 struct E0111 : Errors
 {
-    E0111(Position coord, int quantity,  std::string customErrorMessage = "")
+    E0111(Position coord, int quantity, std::string customErrorMessage = "")
         : Errors()
     {
         m_coord = coord;
@@ -312,6 +313,37 @@ struct E0111 : Errors
             parentheseType = '(';
         }
         m_errorMessage = "Lack of Matching Parentheses: " + std::to_string(abs(quantity)) + " too many '" + parentheseType + "'";
+
+        Raise();
+    }
+};
+
+// Invalid operator sequence
+struct E0112 : Errors
+{
+    enum ErrorTypes { DUPLICATE, ORDER };
+
+    E0112(Position coord, ErrorTypes errorType, std::string customErrorMessage = "")
+        : Errors()
+    {
+        m_coord = coord;
+        errorCode = __func__;
+
+        m_errorMessage = customErrorMessage;
+        if (customErrorMessage != "")
+        {
+            Raise();
+            return;
+        }
+
+        if (errorType == ErrorTypes::DUPLICATE)
+        {
+            m_errorMessage = "Invalid Operator Sequence: Duplicate Operators";
+        }
+        else if (errorType == ErrorTypes::ORDER)
+        {
+            m_errorMessage = "Invalid Operator Sequence: Invalid Order with +,- & *,/";
+        }
 
         Raise();
     }
