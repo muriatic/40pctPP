@@ -411,5 +411,24 @@ struct E0203 : Errors
     }
 };
 
+// out.c already exists
+struct E0204 : Errors
+{
+    E0204(Position coord, std::string customErrorMessage = "")
+        : Errors()
+    {
+        m_coord = coord;
+        errorCode = __func__;
+
+        m_errorMessage = customErrorMessage;
+        if (customErrorMessage == "")
+        {
+            m_errorMessage = "File: out.c already exists, delete this file or move to another directory and recompile";
+        }
+
+        Raise();
+    }
+};
+
 
 #endif

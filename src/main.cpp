@@ -3,11 +3,15 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <filesystem>
+
 
 #include "tokenizer.h"
 #include "parser.h"
 #include "generation.cpp"
 #include "errors.h"
+#include "position.h"
+
 
 std::string Errors::fileName;
 
@@ -46,12 +50,18 @@ int main(int argc, char* argv[]) {
 		std::cerr << "Invalid program, no instructions detected" << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
+	// check if there already is an out file
+	if (std::filesystem::exists("out.c") == 1)
+	{
+		E0204 err(Position{ 0, 0 });
+	}
+
 	Generator generator(prog.value());
 	{
 		std::fstream file("out.c", std::ios::out);
 		file << generator.GenProg();
 	}
-
 
 	//! create file name that wont cause overriding
 	//! give user option to choose output name
@@ -71,6 +81,9 @@ int main(int argc, char* argv[]) {
 	const char* cmd = command.c_str();
 	
 	system(cmd);
+
+	// delete out.c
+	std::remove("out.c");
 
 	return EXIT_SUCCESS;
 }

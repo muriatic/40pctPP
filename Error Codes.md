@@ -19,3 +19,4 @@
 - E0201 &rarr; Invalid Token Type or Order
 - E0202 &rarr; Variable Already Defined or Initialized
 - E0203 &rarr; Variable Not Defined or Initialized
+- E0204 &rarr; out.c Already Exists, Cannot Override 
