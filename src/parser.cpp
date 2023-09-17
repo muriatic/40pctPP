@@ -71,6 +71,17 @@ std::optional<NodeExpr> Parser::ParseExpr()
 			E0110 error(position);
 			
 		}
+		else if (std::find(OperatorGroups::UnaryOperators.begin(), OperatorGroups::UnaryOperators.end(), Peek().value().type) != OperatorGroups::UnaryOperators.end())
+		{
+			// ensure next token is a semicolon
+			if (!Peek(1).has_value() || Peek(1).value().type != TokenType::SEMICOLON)
+			{
+				E0106 error(position, E0106::ErrorTypes::EXPECTED_SEMICOLON);
+			}
+
+			expr.var.push_back(NodeExprUnaryOperator{ .Operation = Consume() });
+			continue;
+		}
 		E0109 error(position, Peek().value().type);
 		
 	}
@@ -197,10 +208,9 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (!Peek().value().value.has_value())
 		{
 			E0106 error(position, E0106::ErrorTypes::NO_IDENT);
-			
 		}
 
-		auto stmt_INT_assignment = NodeStmtIntAssignment{ .IDENT = Consume() };
+		auto stmt_INT_assignment = NodeStmtIntAssignment{ .IDENT = Consume()};
 
 		varName = *stmt_INT_assignment.IDENT.value;
 
@@ -210,11 +220,39 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		if (m_idents.empty() || std::find(m_idents.begin(), m_idents.end(), varName) == m_idents.end())
 		{
 			E0106 error(position, E0106::ErrorTypes::VAR_NOT_INITIALIZED, varName);
+		}
+
+		if (std::find(OperatorGroups::UnaryOperators.begin(), OperatorGroups::UnaryOperators.end(), Peek().value().type) != OperatorGroups::UnaryOperators.end())
+		{
+			auto expr = ParseExpr();
 			
+			if (!expr)
+			{
+				E0106 error(position, E0106::ErrorTypes::EXPECTED_OPERATOR);
+			}
+
+			// more than one operator or something after the unary operator
+			if (expr.value().var.size() != 1)
+			{
+				E0106 error(position, E0106::ErrorTypes::EXPECTED_SEMICOLON);
+			}
+
+			auto stmt_INT_operation = NodeStmtIntOperation{ .IDENT = stmt_INT_assignment.IDENT };
+
+			stmt_INT_operation.expr = expr.value();
+
+			if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
+			{
+				E0106 error(position, E0106::ErrorTypes::EXPECTED_SEMICOLON);
+			}
+
+			Consume();
+
+			return NodeStmt{ .var = stmt_INT_operation };
 		}
 
 		// check if token DNE or isn't an =
-		if (!Peek().has_value() || Peek().value().type != TokenType::EQUALS)
+		if (!Peek().has_value() || (Peek().value().type != TokenType::EQUALS))
 		{
 			E0106 error(position, E0106::ErrorTypes::NO_EQUAL, varName);
 		}

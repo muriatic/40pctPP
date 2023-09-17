@@ -34,6 +34,14 @@ public:
 
 				gen->m_output << " " << OperatorGroups::OperatorStrings[idx] << " ";
 			}
+			void operator()(const NodeExprUnaryOperator& expr_ternary_operator) const
+			{
+				auto it = find(OperatorGroups::UnaryOperators.begin(), OperatorGroups::UnaryOperators.end(), expr_ternary_operator.Operation.type);
+
+				int idx = it - OperatorGroups::UnaryOperators.begin();
+
+				gen->m_output << OperatorGroups::UnaryOperatorStrings[idx];
+			}
 			void operator()(const NodeExpr& expr) const
 			{
 				gen->m_output << "(";
@@ -119,6 +127,24 @@ public:
 				gen->m_output << stmt_INT_assignment.IDENT.value.value() << " =";
 
 				gen->GenExpr(stmt_INT_assignment.expr);
+
+				gen->m_output << ";\n";
+			}
+
+			void operator()(const NodeStmtIntOperation& stmt_INT_operation) const
+			{
+				std::vector<std::string> vars = gen->m_vars;
+
+				// check if the variable hasn't been initialized or the variable list is empty
+				if (vars.empty() || std::find(vars.begin(), vars.end(), stmt_INT_operation.IDENT.value.value()) == vars.end())
+				{
+					E0202 error(stmt_INT_operation.IDENT.position, stmt_INT_operation.IDENT.value.value());
+					error.Raise();
+				}
+
+				gen->m_output << stmt_INT_operation.IDENT.value.value();
+
+				gen->GenExpr(stmt_INT_operation.expr);
 
 				gen->m_output << ";\n";
 			}

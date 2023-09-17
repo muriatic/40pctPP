@@ -9,7 +9,7 @@
 #include "position.h"
 //#pragma once
 
-enum TokenType { RETURN, INTEGER_DEF, OPEN_PAREN, CLOSE_PAREN, INT_LITERAL, SEMICOLON, IDENT, EQUALS, ADDITION, EXIT , SUBTRACTION, MULTIPLICATION, DIVISION};
+enum TokenType { RETURN, INTEGER_DEF, OPEN_PAREN, CLOSE_PAREN, INT_LITERAL, SEMICOLON, IDENT, EQUALS, ADDITION, EXIT , SUBTRACTION, MULTIPLICATION, DIVISION, INCREMENT, DECREMENT};
 
 
 struct Tokens
@@ -24,6 +24,8 @@ struct Tokens
 namespace OperatorGroups
 {
 	extern std::vector<TokenType> OperatorTokens;
+	extern std::vector<TokenType> UnaryOperators;
+	extern std::vector<std::string> UnaryOperatorStrings;
 	extern std::vector<std::string> OperatorStrings;
 }
 

@@ -177,7 +177,7 @@ struct E0105 : Errors
 // Invalid integer assignment
 struct E0106 : Errors
 {
-    enum ErrorTypes {NO_IDENT, VAR_NOT_INITIALIZED, NO_EQUAL, EXPECTED_INT_LITERAL, EXPECTED_SEMICOLON};
+    enum ErrorTypes {NO_IDENT, VAR_NOT_INITIALIZED, NO_EQUAL, EXPECTED_INT_LITERAL, EXPECTED_SEMICOLON, EXPECTED_OPERATOR};
 
     E0106(Position coord, ErrorTypes errorType, std::string val = "", std::string customErrorMessage = "")
         : Errors()
@@ -215,6 +215,11 @@ struct E0106 : Errors
         else if (errorType == ErrorTypes::EXPECTED_SEMICOLON)
         {
             m_errorMessage = "Invalid integer assignment, expected ';'";
+        }
+
+        else if (errorType == ErrorTypes::EXPECTED_OPERATOR)
+        {
+            m_errorMessage = "Invalid integer assignment, expected unary operator after variable name";
         }
 
         Raise();

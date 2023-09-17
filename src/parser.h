@@ -24,12 +24,18 @@ struct NodeExprOperator
 	Tokens Operation;
 };
 
+struct NodeExprUnaryOperator
+{
+	//
+	Tokens Operation;
+};
+
 struct NodeExprIdent {
 	Tokens ident;
 };
 
 struct NodeExpr {
-	std::vector<std::variant<NodeExpr, NodeExprIntLit, NodeExprIdent, NodeExprOperator>> var;
+	std::vector<std::variant<NodeExpr, NodeExprIntLit, NodeExprIdent, NodeExprOperator, NodeExprUnaryOperator>> var;
 	//std::variant<NodeExprIntLit, NodeExprIdent> var;
 };
 
@@ -51,8 +57,13 @@ struct NodeStmtIntAssignment {
 	NodeExpr expr;
 };
 
+struct NodeStmtIntOperation {
+	Tokens IDENT;
+	NodeExpr expr;
+};
+
 struct NodeStmt {
-	std::variant<NodeStmtReturn, NodeStmtExit, NodeStmtIntDef, NodeStmtIntAssignment> var;
+	std::variant<NodeStmtReturn, NodeStmtExit, NodeStmtIntDef, NodeStmtIntAssignment, NodeStmtIntOperation> var;
 };
 
 struct NodeProg {

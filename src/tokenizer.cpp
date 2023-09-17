@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <string>
 
 
 #include "tokenizer.h"
@@ -91,15 +92,54 @@ std::vector <Tokens> Tokenizer::Tokenize()
 		}
 		else if (Peek().value() == '+')
 		{
-			tokens.push_back({ .type = TokenType::ADDITION, .position = m_position });
-			Consume();
-			continue;
+			buffer.push_back(Consume());
+			// set the buffer equal to the alphanumeric characters until something else
+			while (Peek().has_value() && (Peek().value() == '+' /*|| Peek().value() == '='*/)) {
+				buffer.push_back(Consume());
+			}
+
+			if (buffer == "+")
+			{
+				tokens.push_back({ .type = TokenType::ADDITION, .position = m_position });
+				buffer.clear();
+				continue;
+			}
+
+			if (buffer == "++")
+			{
+				tokens.push_back({ .type = TokenType::INCREMENT, .position = m_position });
+				buffer.clear();
+				continue;
+			}
+
+			E0001 error(buffer, m_position);
+
+			//if (buffer == "+=")
+
 		}
 		else if (Peek().value() == '-')
 		{
-			tokens.push_back({ .type = TokenType::SUBTRACTION, .position = m_position });
-			Consume();
-			continue;
+			buffer.push_back(Consume());
+			// set the buffer equal to the alphanumeric characters until something else
+			while (Peek().has_value() && (Peek().value() == '-' /*|| Peek().value() == '='*/)) {
+				buffer.push_back(Consume());
+			}
+
+			if (buffer == "-")
+			{
+				tokens.push_back({ .type = TokenType::SUBTRACTION, .position = m_position });
+				buffer.clear();
+				continue;
+			}
+
+			if (buffer == "--")
+			{
+				tokens.push_back({ .type = TokenType::DECREMENT, .position = m_position });
+				buffer.clear();
+				continue;
+			}
+
+			E0001 error(buffer, m_position);
 		}
 		else if (Peek().value() == '*')
 		{
@@ -126,7 +166,7 @@ std::vector <Tokens> Tokenizer::Tokenize()
 		}	
 		else
 		{
-			E0101 error(m_position);
+			E0001 error(std::to_string(Peek().value()), m_position);
 		}
 	}
 
