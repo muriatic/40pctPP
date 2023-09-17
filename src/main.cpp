@@ -9,7 +9,6 @@
 #include "generation.cpp"
 #include "errors.h"
 
-
 std::string Errors::fileName;
 
 int main(int argc, char* argv[]) {
@@ -18,7 +17,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << "40pctPP <fileName.40pctPP>" << std::endl;
 		return EXIT_FAILURE;
 	}
-	
+
 	std::string sourceFile = argv[1];
 	std::string sourceFileName;
 	{
@@ -39,12 +38,6 @@ int main(int argc, char* argv[]) {
 	Tokenizer tokenizer(fileContents);
 	std::vector <Tokens> tokens = tokenizer.Tokenize();
 
-	// remove before prod
-	/*for (int i = 0; i < tokens.size(); i++)
-	{
-		std::cout << str_types[tokens[i].type] << std::endl;
-	}*/
-
 	Parser parser(tokens);
 	std::optional<NodeProg> prog = parser.ParseProgram();
 
@@ -53,7 +46,6 @@ int main(int argc, char* argv[]) {
 		std::cerr << "Invalid program, no instructions detected" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-
 	Generator generator(prog.value());
 	{
 		std::fstream file("out.c", std::ios::out);
@@ -73,7 +65,6 @@ int main(int argc, char* argv[]) {
 		outputFileName = sourceFileName.substr(0, lastIDX);
 	}
 	
-	return 0;
 
 	std::string command = compiler +  " -o " + outputFileName + " " + CfileName;
 	
