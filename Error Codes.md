@@ -13,6 +13,7 @@
 - E0109 &rarr; Unrecognized Character
 - E0110 &rarr; Unexpected Integer Assignment within Expression
 - E0111 &rarr; Lack of Matching Parentheses 
+- E0112 &rarr; Invalid Operator Sequence 
 
 ### Generator Errors 0201-0300:
 - E0201 &rarr; Invalid Token Type or Order
