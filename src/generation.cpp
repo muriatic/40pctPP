@@ -90,7 +90,6 @@ public:
 				if (!vars.empty() && IsIn(vars, stmt_INT_def.IDENT.value.value()) != -1)
 				{
 					E0202 error(stmt_INT_def.IDENT.position, stmt_INT_def.IDENT.value.value());
-					error.Raise();
 				}
 
 				//! an INT DEF has:
@@ -118,7 +117,6 @@ public:
 				if (vars.empty() || IsIn(vars, stmt_INT_assignment.IDENT.value.value()) == -1)
 				{
 					E0202 error(stmt_INT_assignment.IDENT.position, stmt_INT_assignment.IDENT.value.value());
-					error.Raise();
 				}
 
 				gen->m_output << stmt_INT_assignment.IDENT.value.value() << " =";
@@ -136,7 +134,6 @@ public:
 				if (vars.empty() || IsIn(vars, stmt_INT_operation.IDENT.value.value()) == -1)
 				{
 					E0202 error(stmt_INT_operation.IDENT.position, stmt_INT_operation.IDENT.value.value());
-					error.Raise();
 				}
 
 				gen->m_output << stmt_INT_operation.IDENT.value.value();
