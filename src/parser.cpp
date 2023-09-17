@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "tokens.h"
 #include "errors.h"
+#include "vector_functions.h"
 
 Parser::Parser(std::vector <Tokens> tokens)
 {
@@ -48,7 +49,7 @@ std::optional<NodeExpr> Parser::ParseExpr()
 			}
 			E0111 error(position, parentheses);
 		}
-		else if (std::find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), Peek().value().type) != OperatorGroups::OperatorTokens.end())
+		else if (IsIn(OperatorGroups::OperatorTokens, Peek().value().type) != -1)
 		{
 			// check for duplicate operators (checks if current operator and next token are the same
 			if (Peek().value().type == Peek(1).value().type)
@@ -71,7 +72,7 @@ std::optional<NodeExpr> Parser::ParseExpr()
 			E0110 error(position);
 			
 		}
-		else if (std::find(OperatorGroups::UnaryOperators.begin(), OperatorGroups::UnaryOperators.end(), Peek().value().type) != OperatorGroups::UnaryOperators.end())
+		else if (IsIn(OperatorGroups::UnaryOperators, Peek().value().type) != -1)
 		{
 			// ensure next token is a semicolon
 			if (!Peek(1).has_value() || Peek(1).value().type != TokenType::SEMICOLON)
@@ -160,7 +161,7 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		std::string varName = *stmt_INT_def.IDENT.value;
 
 		// check if the variable has been defined before
-		if (!m_idents.empty() && std::find(m_idents.begin(), m_idents.end(), varName) != m_idents.end())
+		if (!m_idents.empty() && IsIn(m_idents, varName) != -1)
 		{
 			E0105 error(position, E0105::ErrorTypes::ALREADY_DEFINED, varName);
 			
@@ -217,12 +218,12 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// check if this variable has been defined before
 
 		// check if the list is empty or the variable has been defined before
-		if (m_idents.empty() || std::find(m_idents.begin(), m_idents.end(), varName) == m_idents.end())
+		if (m_idents.empty() || IsIn(m_idents, varName) == -1)
 		{
 			E0106 error(position, E0106::ErrorTypes::VAR_NOT_INITIALIZED, varName);
 		}
 
-		if (std::find(OperatorGroups::UnaryOperators.begin(), OperatorGroups::UnaryOperators.end(), Peek().value().type) != OperatorGroups::UnaryOperators.end())
+		if (IsIn(OperatorGroups::UnaryOperators, Peek().value().type) != -1)
 		{
 			auto expr = ParseExpr();
 			

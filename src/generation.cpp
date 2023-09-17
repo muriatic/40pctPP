@@ -6,6 +6,7 @@
 #include "parser.h"
 #include "tokens.h"
 #include "errors.h"
+#include "vector_functions.h"
 
 class Generator {
 public:
@@ -28,17 +29,13 @@ public:
 			}
 			void operator()(const NodeExprOperator& expr_operator) const
 			{
-				auto it = find(OperatorGroups::OperatorTokens.begin(), OperatorGroups::OperatorTokens.end(), expr_operator.Operation.type);
-
-				int idx = it - OperatorGroups::OperatorTokens.begin();
+				int idx = IsIn(OperatorGroups::OperatorTokens, expr_operator.Operation.type);
 
 				gen->m_output << " " << OperatorGroups::OperatorStrings[idx] << " ";
 			}
 			void operator()(const NodeExprUnaryOperator& expr_ternary_operator) const
 			{
-				auto it = find(OperatorGroups::UnaryOperators.begin(), OperatorGroups::UnaryOperators.end(), expr_ternary_operator.Operation.type);
-
-				int idx = it - OperatorGroups::UnaryOperators.begin();
+				int idx = IsIn(OperatorGroups::UnaryOperators, expr_ternary_operator.Operation.type);
 
 				gen->m_output << OperatorGroups::UnaryOperatorStrings[idx];
 			}
@@ -90,7 +87,7 @@ public:
 
 				std::vector <std::string> vars = gen->m_vars;
 
-				if (!vars.empty() && std::find(vars.begin(), vars.end(), stmt_INT_def.IDENT.value.value()) != vars.end())
+				if (!vars.empty() && IsIn(vars, stmt_INT_def.IDENT.value.value()) != -1)
 				{
 					E0202 error(stmt_INT_def.IDENT.position, stmt_INT_def.IDENT.value.value());
 					error.Raise();
@@ -118,7 +115,7 @@ public:
 				std::vector<std::string> vars = gen->m_vars;
 				
 				// check if the variable hasn't been initialized or the variable list is empty
-				if (vars.empty() || std::find(vars.begin(), vars.end(), stmt_INT_assignment.IDENT.value.value()) == vars.end())
+				if (vars.empty() || IsIn(vars, stmt_INT_assignment.IDENT.value.value()) == -1)
 				{
 					E0202 error(stmt_INT_assignment.IDENT.position, stmt_INT_assignment.IDENT.value.value());
 					error.Raise();
@@ -136,7 +133,7 @@ public:
 				std::vector<std::string> vars = gen->m_vars;
 
 				// check if the variable hasn't been initialized or the variable list is empty
-				if (vars.empty() || std::find(vars.begin(), vars.end(), stmt_INT_operation.IDENT.value.value()) == vars.end())
+				if (vars.empty() || IsIn(vars, stmt_INT_operation.IDENT.value.value()) == -1)
 				{
 					E0202 error(stmt_INT_operation.IDENT.position, stmt_INT_operation.IDENT.value.value());
 					error.Raise();
