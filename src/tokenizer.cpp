@@ -166,7 +166,7 @@ std::vector <Tokens> Tokenizer::Tokenize()
 		}	
 		else
 		{
-			E0001 error(std::to_string(Peek().value()), m_position);
+			E0001 error(std::string(1, Peek().value()), m_position);
 		}
 	}
 
