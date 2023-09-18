@@ -41,4 +41,3 @@ Example: `SAYALOUD, 'say, what a great function SAYALOUD is' .;`
 Every file must be ended with `PLEASE_STOP` or else... \
 Examples: `PLEASE_STOP`
 <hr>
-
