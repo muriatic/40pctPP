@@ -1,4 +1,4 @@
-# 40pct++
+# Badger++
 <hr>
 <br>
-A simple programming language written for 40 % keyboards (not yet implemented) with the hopes of teaching me C++
+For now, I plan on implementing similar features of C/C++ to help learn and then add the esoteric features, I would like to add
