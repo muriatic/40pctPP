@@ -6,6 +6,7 @@
 #include "tokens.h"
 #include "errors.h"
 #include "vector_functions.h"
+#include "operators.h"
 
 Parser::Parser(std::vector <Tokens> tokens)
 {
@@ -49,7 +50,7 @@ std::optional<NodeExpr> Parser::ParseExpr()
 			}
 			E0111 error(position, parentheses);
 		}
-		else if (IsIn(OperatorGroups::OperatorTokens, Peek().value().type) != -1)
+		else if (IsIn(ArithmeticOperators::tokens, Peek().value().type) != -1)
 		{
 			// check for duplicate operators (checks if current operator and next token are the same
 			if (Peek().value().type == Peek(1).value().type)
@@ -58,9 +59,9 @@ std::optional<NodeExpr> Parser::ParseExpr()
 			}
 
 			// if its not addition or subtraction just push it back and we're good
-			if (
-				(Peek().value().type == TokenType::ADDITION || Peek().value().type == TokenType::SUBTRACTION) 
-				&& (Peek(1).value().type == TokenType::MULTIPLICATION || Peek(1).value().type == TokenType::DIVISION)) {
+			if ((Peek().value().type == TokenType::ADDITION || Peek().value().type == TokenType::SUBTRACTION) && 
+				(Peek(1).value().type == TokenType::MULTIPLICATION || Peek(1).value().type == TokenType::DIVISION)) 
+			{
 				E0112 error(position, E0112::ErrorTypes::ORDER);
 			}
 
@@ -72,7 +73,7 @@ std::optional<NodeExpr> Parser::ParseExpr()
 			E0110 error(position);
 			
 		}
-		else if (IsIn(OperatorGroups::UnaryOperators, Peek().value().type) != -1)
+		else if (IsIn(UnaryOperators::tokens, Peek().value().type) != -1)
 		{
 			// ensure next token is a semicolon
 			if (!Peek(1).has_value() || Peek(1).value().type != TokenType::SEMICOLON)
@@ -285,12 +286,39 @@ std::optional<NodeStmt> Parser::ParseStmt()
 		// consume exit token
 		Consume();
 
-		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
+		if (!Peek().has_value() || Peek().value().type != TokenType::OPEN_PAREN)
 		{
-			E0107 error(position);
-			
+			E0107 error(position, E0107::ErrorTypes::EXPECTED_OPEN_PAREN);
 		}
 
+		// consume the open parentheses
+		Consume();
+
+		// consume the integer literal
+		//! note this exitcode should be dealt with
+		//! 
+		//! 
+		if (!Peek().has_value() || Peek().value().type != TokenType::INT_LITERAL)
+		{
+			E0107 error(position, E0107::ErrorTypes::EXPECTED_INT_LITERAL);
+		}
+
+		Consume();
+
+		if (!Peek().has_value() || Peek().value().type != TokenType::CLOSE_PAREN)
+		{
+			E0107 error(position, E0107::ErrorTypes::EXPECTED_CLOSE_PAREN);
+		}
+		
+		// consume the close parentheses
+		Consume();
+
+		if (!Peek().has_value() || Peek().value().type != TokenType::SEMICOLON)
+		{
+			E0107 error(position, E0107::ErrorTypes::EXPECTED_SEMICOLON);			
+		}
+
+		// Consume the semicolon
 		Consume();
 
 		return NodeStmt{ .var = NodeStmtExit{} };

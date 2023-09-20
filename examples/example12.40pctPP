@@ -1,2 +1,4 @@
-INT i = 1;
+int i = 1;
 i++;
+
+exit(0);

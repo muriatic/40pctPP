@@ -36,16 +36,23 @@ std::vector <Tokens> Tokenizer::Tokenize()
 				continue;
 			}
 
-			if (buffer == "INT")
+			if (buffer == "int")
 			{
 				tokens.push_back({ .type = TokenType::INTEGER_DEF, .position = m_position });
 				buffer.clear();
 				continue;
 			}
 
-			if (buffer == "PLEASE_STOP")
+			if (buffer == "exit")
 			{
 				tokens.push_back({ .type = TokenType::EXIT, .position = m_position });
+				buffer.clear();
+				continue;
+			}
+
+			if (buffer == "if")
+			{
+				tokens.push_back({ .type = TokenType::IF, .position = m_position });
 				buffer.clear();
 				continue;
 			}
@@ -68,9 +75,27 @@ std::vector <Tokens> Tokenizer::Tokenize()
 		}
 		else if (Peek().value() == '=')
 		{
-			tokens.push_back({ .type = TokenType::EQUALS, .position = m_position });
-			Consume();
-			continue;
+			buffer.push_back(Consume());
+			// set the buffer equal to the alphanumeric characters until something else
+			while (Peek().has_value() && (Peek().value() == '=')) {
+				buffer.push_back(Consume());
+			}
+
+			if (buffer == "=")
+			{
+				tokens.push_back({ .type = TokenType::EQUALS, .position = m_position });
+				buffer.clear();
+				continue;
+			}
+
+			if (buffer == "==")
+			{
+				tokens.push_back({ .type = TokenType::IS_EQUAL_TO, .position = m_position });
+				buffer.clear();
+				continue;
+			}
+
+			E0001 error(buffer, m_position);
 		}
 		else if (Peek().value() == '(')
 		{
@@ -81,6 +106,18 @@ std::vector <Tokens> Tokenizer::Tokenize()
 		else if (Peek().value() == ')')
 		{
 			tokens.push_back({ .type = TokenType::CLOSE_PAREN, .position = m_position });
+			Consume();
+			continue;
+		}
+		else if (Peek().value() == '{')
+		{
+			tokens.push_back({ .type = TokenType::OPEN_BRACKET, .position = m_position });
+			Consume();
+			continue;
+		}
+		else if (Peek().value() == '}')
+		{
+			tokens.push_back({ .type = TokenType::CLOSE_BRACKET, .position = m_position });
 			Consume();
 			continue;
 		}

@@ -189,7 +189,6 @@ struct E0106 : Errors
         if (customErrorMessage != "")
         {
             Raise();
-            return;
         }
 
         if (errorType == ErrorTypes::NO_IDENT)
@@ -229,16 +228,38 @@ struct E0106 : Errors
 // invalid exit statement
 struct E0107 : Errors
 {
-    E0107(Position coord, std::string customErrorMessage = "")
+    enum ErrorTypes { EXPECTED_OPEN_PAREN, EXPECTED_SEMICOLON, EXPECTED_CLOSE_PAREN, EXPECTED_INT_LITERAL };
+
+    E0107(Position coord, ErrorTypes errorType, std::string customErrorMessage = "")
         : Errors()
     {
         m_coord = coord;
         errorCode = __func__;
 
         m_errorMessage = customErrorMessage;
-        if (customErrorMessage == "")
+        if (customErrorMessage != "")
         {
-            m_errorMessage = "Invalid function termination, expected ';'";
+            Raise();
+        }
+
+        if (errorType == ErrorTypes::EXPECTED_SEMICOLON)
+        {
+            m_errorMessage = "Invalid exit statement, expected ';'";
+        }
+
+        else if (errorType == ErrorTypes::EXPECTED_OPEN_PAREN)
+        {
+            m_errorMessage = "Invalid exit statement, expected '('";
+        }
+
+        else if (errorType == ErrorTypes::EXPECTED_CLOSE_PAREN)
+        {
+            m_errorMessage = "Invalid exit statement, expected ')'";
+        }
+
+        else if (errorType == ErrorTypes::EXPECTED_INT_LITERAL)
+        {
+            m_errorMessage = "Invalid exit statement, expected exit code as an integer literal";
         }
 
         Raise();
